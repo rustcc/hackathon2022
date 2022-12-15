@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
+use bevy_rubikscube::BevyRubiksCubePlugin;
 
 fn main() {
     let mut app = App::new();
@@ -10,7 +11,8 @@ fn main() {
         },
         ..default()
     }))
-    .add_plugin(EguiPlugin);
+    .add_plugin(EguiPlugin)
+    .add_plugin(BevyRubiksCubePlugin);
 
     #[cfg(feature = "debug")]
     {
