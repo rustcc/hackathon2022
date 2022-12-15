@@ -4,14 +4,28 @@ version = "0.1.0"
 authors = ["ZoOL <zhooul@gmail.com>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = true
+codegen-units = 1
+
 
 [features]
-debug = ["bevy-inspector-egui"]
+dev = ["bevy/dynamic"]
 
 [dependencies]
 bevy = "0.9"
 bevy_egui = "0.17.1"
-bevy-inspector-egui = { version = "0.14.0", optional = true }
 nom = "7"
 rand = "0.8.5"
+
+winit = { version = "0.27", default-features = false }
+image = { version = "0.24", default-features = false }
+
+[build-dependencies]
+embed-resource = "1.4"

@@ -1,6 +1,6 @@
 use bevy::app::{App, Plugin};
 use bevy::math::Vec3;
-use bevy::prelude::{Camera3dBundle, Commands, EventWriter, Transform};
+use bevy::prelude::{Camera3dBundle, Commands, Transform};
 
 /// 相机插件
 pub struct CameraPlugin;

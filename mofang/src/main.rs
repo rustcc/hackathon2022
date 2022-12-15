@@ -1,20 +1,29 @@
+// 在发布模式下 windows系统，关闭命令行窗口
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use bevy::prelude::*;
+use bevy::window::WindowId;
+use bevy::winit::WinitWindows;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_rubikscube::core::flatten;
 use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle};
 use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
+use std::io::Cursor;
+use winit::window::Icon;
 
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         window: WindowDescriptor {
             title: "Rubiks's Cube".to_string(),
+            canvas: Some("#bevy".to_owned()),
             ..default()
         },
         ..default()
     }))
     .add_plugin(EguiPlugin)
     .add_plugin(BevyRubiksCubePlugin)
+    .add_startup_system(set_window_icon)
     .add_system(dashboard_ui);
 
     #[cfg(feature = "debug")]
@@ -70,4 +79,19 @@ fn dashboard_ui(
                 }
             })
     });
+}
+
+/// 设置windows图标
+fn set_window_icon(windows: NonSend<WinitWindows>) {
+    let primary = windows.get_window(WindowId::primary()).unwrap();
+    let icon_buf = Cursor::new(include_bytes!(
+        "../build/macos/AppIcon.iconset/icon_256x256.png"
+    ));
+    if let Ok(image) = image::load(icon_buf, image::ImageFormat::Png) {
+        let image = image.into_rgba8();
+        let (width, height) = image.dimensions();
+        let rgba = image.into_raw();
+        let icon = Icon::from_rgba(rgba, width, height).unwrap();
+        primary.set_window_icon(Some(icon));
+    };
 }

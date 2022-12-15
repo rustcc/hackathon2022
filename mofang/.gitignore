@@ -7,4 +7,5 @@ Cargo.lock
 /.idea
 /.vscode
 
+dist/
 
