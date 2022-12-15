@@ -170,6 +170,27 @@ impl Command {
             BaseMove::Z => Quat::from_rotation_z(self.angle()),
         }
     }
+
+    pub fn axis(&self) -> Vec3 {
+        match self.0 {
+            BaseMove::U => Vec3::Y,
+            BaseMove::L => Vec3::X,
+            BaseMove::F => Vec3::Z,
+            BaseMove::R => Vec3::X,
+            BaseMove::B => Vec3::Z,
+            BaseMove::D => Vec3::Y,
+            BaseMove::M => Vec3::X,
+            BaseMove::E => Vec3::Y,
+            BaseMove::S => Vec3::Z,
+            BaseMove::X => Vec3::X,
+            BaseMove::Y => Vec3::Y,
+            BaseMove::Z => Vec3::Z,
+        }
+    }
+
+    pub fn clockwise(&self) -> bool {
+        self.1 > 0
+    }
 }
 impl Display for Command {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

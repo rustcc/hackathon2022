@@ -1,4 +1,4 @@
-use crate::core::{random_command, Command, Piece, Surface};
+use crate::core::{random_command, Command, Piece, Surface, BaseMove};
 use bevy::prelude::*;
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
@@ -13,6 +13,7 @@ impl Plugin for ViewerPlugin {
             .add_event::<RandomPuzzle>()
             .init_resource::<CubeSettings>()
             .init_resource::<MoveSequence>()
+            .init_resource::<ExecutingCommand>()
             .register_type::<Piece>()
             .add_startup_system(setup)
             .add_system(create_cube_event)
@@ -41,6 +42,8 @@ pub struct CubeSettings {
     pub top_color: Color,
     /// 下面的颜色
     pub bottom_color: Color,
+    /// 旋转速度
+    pub rotate_speed: f32,
 }
 
 impl Default for CubeSettings {
@@ -54,6 +57,7 @@ impl Default for CubeSettings {
             right_color: Color::RED,
             top_color: Color::WHITE,
             bottom_color: Color::YELLOW,
+            rotate_speed: 1.0
         }
     }
 }
@@ -61,6 +65,20 @@ impl Default for CubeSettings {
 /// 旋转魔方的队列
 #[derive(Deref, DerefMut, Resource, Default)]
 pub struct MoveSequence(pub VecDeque<Command>);
+
+/// 正在执行的command
+#[derive(Resource)]
+pub struct ExecutingCommand {
+    pub command: Command,
+    // 剩余待旋转的弧度
+    pub left_angle: f32,
+}
+
+impl Default for ExecutingCommand {
+    fn default() -> Self {
+        Self { command: Command(BaseMove::U, 0), left_angle: 0.0 }
+    }
+}
 
 /// 生成魔方事件
 #[derive(Debug)]
@@ -271,20 +289,50 @@ fn spawn_piece(
 /// 旋转魔方
 fn move_piece(
     mut move_seq: ResMut<MoveSequence>,
+    mut executing_cmd: ResMut<ExecutingCommand>,
     mut q_pieces: Query<(&mut Transform, &Piece)>,
     mut update_ev: EventWriter<UpdateSurface>,
+    cube_settings: Res<CubeSettings>,
+    time: Res<Time>,
 ) {
-    if let Some(command) = move_seq.pop_front() {
-        info!("command: {}", command);
-        let quat = command.rotation();
-
-        for (mut transform, piece) in q_pieces.iter_mut() {
-            if piece.is_selected(&command) {
-                transform.rotate_around(Vec3::ZERO, quat);
+    if executing_cmd.left_angle == 0.0 {
+        update_ev.send(UpdateSurface);
+        // 读取下一个指令
+        if let Some(command) = move_seq.pop_front() {
+            info!("command: {}", command);
+            executing_cmd.command = command;
+            executing_cmd.left_angle = command.angle();
+        }
+    } else {
+        let clockwise = executing_cmd.command.clockwise();
+        let mut angle = match clockwise {
+            true => { cube_settings.rotate_speed * PI * time.delta_seconds() },
+            false => { -cube_settings.rotate_speed * PI * time.delta_seconds() },
+        };
+        let left_angle = executing_cmd.left_angle;
+        let mut new_left_angle = left_angle - angle;
+        // 判断left_angle是否足够支持一帧旋转
+        if clockwise {
+            if new_left_angle < 0.0 {
+                angle = left_angle;
+                new_left_angle = 0.0;
+            }
+        } else {
+            if new_left_angle > 0.0 {
+                angle = left_angle;
+                new_left_angle = 0.0;
             }
         }
 
-        update_ev.send(UpdateSurface);
+        let quat = Quat::from_axis_angle(executing_cmd.command.axis(), angle);
+
+        for (mut transform, piece) in q_pieces.iter_mut() {
+            if piece.is_selected(&executing_cmd.command) {
+                transform.rotate_around(Vec3::ZERO, quat);
+            }
+        }
+        // 更新left_angle
+        executing_cmd.left_angle = new_left_angle;
     }
 }
 
