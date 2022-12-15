@@ -2,7 +2,10 @@ use crate::camera::CameraPlugin;
 use bevy::app::{App, Plugin};
 
 pub mod camera;
+pub mod core;
+pub mod parser;
 
+/// 魔方插件
 pub struct BevyRubiksCubePlugin;
 
 impl Plugin for BevyRubiksCubePlugin {

@@ -13,3 +13,5 @@ debug = ["bevy-inspector-egui"]
 bevy = "0.9"
 bevy_egui = "0.17.1"
 bevy-inspector-egui = { version = "0.14.0", optional = true }
+nom = "7"
+rand = "0.8.5"
