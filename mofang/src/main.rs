@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
-use bevy_rubikscube::BevyRubiksCubePlugin;
+use bevy_rubikscube::core::flatten;
+use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle};
+use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
 
 fn main() {
     let mut app = App::new();
@@ -12,7 +14,8 @@ fn main() {
         ..default()
     }))
     .add_plugin(EguiPlugin)
-    .add_plugin(BevyRubiksCubePlugin);
+    .add_plugin(BevyRubiksCubePlugin)
+    .add_system(dashboard_ui);
 
     #[cfg(feature = "debug")]
     {
@@ -20,4 +23,51 @@ fn main() {
     }
 
     app.run();
+}
+
+/// 调试UI
+fn dashboard_ui(
+    mut egui_context: ResMut<EguiContext>,
+    mut create_ev: EventWriter<CreateCube>,
+    mut rand_ev: EventWriter<RandomPuzzle>,
+    mut cube_settings: ResMut<CubeSettings>,
+    mut move_seq: ResMut<MoveSequence>,
+) {
+    egui::Window::new("Dashboard").show(egui_context.ctx_mut(), |ui| {
+        egui::ComboBox::from_label("Cubes")
+            .selected_text(format!("{0}x{0}", cube_settings.cube_order))
+            .show_ui(ui, |ui| {
+                for i in 2..=10u8 {
+                    if ui
+                        .selectable_value(&mut cube_settings.cube_order, i, format!("{i}x{i}"))
+                        .clicked()
+                    {
+                        create_ev.send(CreateCube::new(i));
+                    }
+                }
+            });
+
+        ui.separator();
+        if ui.button("random").clicked() {
+            rand_ev.send(RandomPuzzle);
+        }
+        egui::Grid::new("commands_grid")
+            .striped(true)
+            .spacing([20.0, 4.0])
+            .show(ui, |ui| {
+                for l in [
+                    ["U", "L", "F", "R", "B", "D"],
+                    ["U'", "L'", "F'", "R'", "B'", "D'"],
+                ] {
+                    for c in l {
+                        if ui.button(c).clicked() {
+                            for c in flatten(parser::parse(c).unwrap().1).into_iter() {
+                                move_seq.push_back(c)
+                            }
+                        }
+                    }
+                    ui.end_row();
+                }
+            })
+    });
 }

@@ -1,4 +1,5 @@
 use crate::camera::CameraPlugin;
+use crate::viewer::ViewerPlugin;
 use bevy::app::{App, Plugin};
 
 pub mod camera;
@@ -11,6 +12,6 @@ pub struct BevyRubiksCubePlugin;
 
 impl Plugin for BevyRubiksCubePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(CameraPlugin);
+        app.add_plugin(CameraPlugin).add_plugin(ViewerPlugin);
     }
 }
