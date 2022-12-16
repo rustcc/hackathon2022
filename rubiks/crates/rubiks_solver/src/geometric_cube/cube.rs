@@ -135,7 +135,7 @@ impl GeoCube {
         top_layer_stickers
     }
 
-    /// Returns the range of facelet center coordinates along an arbitrary axis.
+    /// 根据指定大小，计算中心坐标的范围
     pub fn range(size: CubeSize) -> Vec<CubeSize> {
         (-size + 1..=size - 1).step_by(2).collect()
     }

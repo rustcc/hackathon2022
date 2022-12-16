@@ -106,11 +106,13 @@ pub trait Cube: Clone + Eq + Hash + PartialEq {
     /// ```
     fn apply_move(&self, mv: Move) -> Self;
 
-    /// Apply a sequence of moves to a cube.
+    /// 对魔方进行多次转动
     ///
     /// # Examples
     ///
-    /// Rotate the upper layer by 90 degrees:
+    /// 1. 转动顶层90°
+    /// 2. 转动右层180度
+    /// 3. 逆时针转动后层90°
     ///
     /// ```rust
     /// use rubiks_solver::prelude::{Cube, Face::*, Move, MoveVariant};
@@ -166,7 +168,7 @@ pub enum Face {
     X,
 }
 
-/// A designated ordering of the faces.
+/// 面的顺序
 pub const ORDERED_FACES: [Face; 6] = [Face::U, Face::R, Face::F, Face::D, Face::L, Face::B];
 
 /// 获取指定面上的指定位置的索引
@@ -194,40 +196,40 @@ pub fn sticker_index(size: CubeSize, face: Face, index: CubeSize) -> CubeSize {
 /// [WCA表示法]: worldcubeassociation.org/regulations/#article-12-notation
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Move {
-    /// 旋转顶层
+    /// 转动顶层
     U(MoveVariant),
-    /// 旋转左层
+    /// 转动左层
     L(MoveVariant),
-    /// 旋转前层
+    /// 转动前层
     F(MoveVariant),
-    /// 旋转右层
+    /// 转动右层
     R(MoveVariant),
-    /// 旋转后层
+    /// 转动后层
     B(MoveVariant),
-    /// 旋转底层
+    /// 转动底层
     D(MoveVariant),
-    /// 旋转顶层起第n层
+    /// 转动顶层起第n层
     Uw(CubeSize, MoveVariant),
-    /// 旋转左层起第n层
+    /// 转动左层起第n层
     Lw(CubeSize, MoveVariant),
-    /// 旋转前层起第n层
+    /// 转动前层起第n层
     Fw(CubeSize, MoveVariant),
-    /// 旋转右层起第n层
+    /// 转动右层起第n层
     Rw(CubeSize, MoveVariant),
-    /// 旋转后层起第n层
+    /// 转动后层起第n层
     Bw(CubeSize, MoveVariant),
-    /// 旋转底层起第n层
+    /// 转动底层起第n层
     Dw(CubeSize, MoveVariant),
-    /// 沿x轴旋转整个魔方
+    /// 沿x轴转动整个魔方
     X(MoveVariant),
-    /// 沿y轴旋转整个魔方
+    /// 沿y轴转动整个魔方
     Y(MoveVariant),
-    /// 沿z轴旋转整个魔方
+    /// 沿z轴转动整个魔方
     Z(MoveVariant),
 }
 
 impl Move {
-    /// 提取Move的MoveVariant
+    /// 获取转动的变量
     pub fn get_variant(&self) -> MoveVariant {
         match self {
             Move::U(v)
@@ -248,7 +250,7 @@ impl Move {
         }
     }
 
-    /// Returns the Move with the given MoveVariant.
+    /// 用给定转动变量产生新的转动
     pub fn with_variant(&self, variant: MoveVariant) -> Move {
         match self {
             Move::U(_) => Move::U(variant),
@@ -270,15 +272,15 @@ impl Move {
     }
 }
 
-/// A move variation that must be applied to the ```Move``` struct.
+/// 控制转动的变量
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum MoveVariant {
-    /// 90°顺时针旋转
+    /// 90°顺时针转动
     Standard = 1,
-    /// 180°旋转
+    /// 180°转动
     Double,
-    /// 90°逆时针旋转
+    /// 90°逆时针转动
     Inverse,
 }
 
