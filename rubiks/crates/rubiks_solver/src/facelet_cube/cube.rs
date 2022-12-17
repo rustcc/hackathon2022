@@ -3,15 +3,7 @@ use crate::generic_cube::{Cube, CubeSize, Face, Move};
 
 use super::moves::compute_permutation;
 
-/// A Rubik's Cube with stickers stored sequentially in a 1-dimensional array.
-///
-/// Each move is implemented as an array of index mappings of the form ``(from_idx, to_idx)``.
-/// A move is then applied by swapping all pieces as specified by these index mappings.
-///
-/// Applying moves for the ``FaceletCube`` is more efficient than the ``GeoCube``, but
-/// it is harder to define moves from scratch. Instead of deriving index mappings from scratch,
-/// we first implement a GeoCube move, then use our conversion function to map the move
-/// to a FaceletCube move.
+///  将魔方的贴纸用一维数组存储起来，数组的长度为 6 * n^2，其中 n 为魔方的阶数。
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct FaceletCube {
     size: CubeSize,
