@@ -191,6 +191,10 @@ fn create_cube_event(
                         .insert(piece)
                         .insert(PickableBundle::default())
                         .insert(RaycastMesh::<MyRaycastSet>::default())
+                        // .insert(PickableBundle::default())
+                        .insert(Piece::new(order, x, y, z))
+                        .insert(PickableBundle::default())
+                        .insert(RaycastMesh::<MyRaycastSet>::default())
                         .with_children(|parent| {
                             // 创建对应的贴纸
                             for face in ORDERED_FACES {
