@@ -1,0 +1,78 @@
+[package]
+name = "lloyd"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[workspace]
+members = [
+        "common",
+        "procmac",
+        "tools",
+        "webase",
+        "webapp/demo-app",
+        "frontend/apidoc",
+]
+
+[workspace.dependencies]
+common = { path = "./common" }
+procmac = { path = "./procmac" }
+tools = { path = "./tools" }
+webase = { path = "./webase" }
+m1 = { path = "./webmod/m1" }
+m2 = { path = "./webmod/m2" }
+#
+proc-macro2 = { version = "1.0" }
+quote = { version = "1.0" }
+syn = { version = "1.0" }
+# 
+ulid = { version = "1.0" }
+chrono = { version = "0.4" }
+log = { version = "0.4" }
+log4rs = { version = "1.1", features = ["gzip"] }
+thiserror = { version = "1.0" }
+anyhow = { version = "1.0" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
+serde_yaml = { version = "0.9" }
+structopt = { version = "0.3" }
+toml = { version = "0.5" }
+regex = { version = "1.6" }
+once_cell = { version = "1.13" }
+futures = { version = "0.3" }
+async_once = { version = "0.2" }
+async-trait = { version = "0.1" }
+tokio = { version = "1.20", features = ["full"] }
+tokio-util = { version = "0.7" }
+bytes = { version = "1.2" }
+mime = { version = "0.3" }
+http = { version = "0.2" }
+tower = { version = "0.4", features = [
+        "util",
+        "timeout",
+        "limit",
+        "load-shed",
+        "steer",
+        "filter",
+] }
+tower-layer = { version = "0.3" }
+tower-service = { version = "0.3" }
+tower-http = { version = "0.3", features = ["full"] }
+hyper = { version = "0.14", features = ["full"] }
+axum = { version = "0.6", features = [
+        "headers",
+        "http2",
+        "multipart",
+        "ws",
+        "macros",
+] }
+reqwest = { version = "0.11", features = ["json"] }
+pnet_datalink = { version = "0.31" }
+headers = { version = "0.3" }
+sycamore = { version = "0.8", features = ["suspense", "default"] }
+derive_more = { version = "0.99" }
+reqwasm = { version = "0.5" }
+console_log = { version = "0.2" }
