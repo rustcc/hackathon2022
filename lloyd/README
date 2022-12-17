@@ -1,0 +1,3 @@
+# 项目介绍
+1.执行 cargo run --package demo-app 
+2.浏览器访问 http://127.0.0.1:9001/static/resources/dist/index.html
