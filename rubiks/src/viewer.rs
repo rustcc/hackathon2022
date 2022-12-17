@@ -5,6 +5,8 @@ use bevy_mod_picking::{PickableBundle, PickingEvent, PickingCameraBundle, Defaul
 use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
 use rubiks_solver::prelude::ORDERED_FACES;
 use rubiks_solver::{rand_moves, solve, Cube, Face, FaceletCube, Move, MoveVariant};
+use bevy_mod_picking::{PickableBundle, PickingEvent, PickingCameraBundle, DefaultPickingPlugins, DebugCursorPickingPlugin, DebugEventsPickingPlugin};
+use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
 use std::time::Instant;
@@ -544,6 +546,159 @@ fn solve_puzzle(
                 for command in s {
                     move_seq.push_back(command);
                 }
+            }
+        }
+    }
+}
+
+pub fn mouse_dragging(
+    mut recorder: ResMut<MouseDraggingRecorder>,
+    mouse: Res<Input<MouseButton>>,
+    mut picking_events: EventReader<PickingEvent>,
+    q_pieces: Query<&Transform, With<Piece>>,
+    q_intersection: Query<&Intersection<MyRaycastSet>>,
+    mut move_seq: ResMut<MoveSequence>,
+) {
+    if mouse.just_pressed(MouseButton::Left) {
+        // recorder开始记录
+        if let Some(event) = picking_events
+            .iter()
+            .filter(|e| match e {
+                PickingEvent::Clicked(_) => true,
+                _ => false,
+            })
+            .last()
+        {
+            let piece_entity = match event {
+                PickingEvent::Clicked(entity) => entity,
+                _ => {
+                    unreachable!();
+                }
+            };
+            recorder.piece = Some(piece_entity.clone());
+
+            if let Some(intersection) = q_intersection.iter().last() {
+                recorder.start_pos = Some(intersection.position().unwrap().clone());
+            } else {
+                panic!("Can not get start pos");
+            }
+
+            info!("MouseDraggingRecorder started {:?}", recorder);
+        }
+    }
+
+    if mouse.pressed(MouseButton::Left) {
+        if recorder.start_pos.is_some() && recorder.piece.is_some() {
+            if let Some(intersection) = q_intersection.iter().last() {
+                // 鼠标拽动距离超过临界值
+                if recorder
+                    .start_pos
+                    .unwrap()
+                    .distance(intersection.position().unwrap().clone())
+                    > 0.5
+                {
+                    // 触发旋转
+                    info!(
+                        "Trigger side move event, end_pos: {:?}",
+                        &intersection.position()
+                    );
+                    let translation = q_pieces.get(recorder.piece.unwrap()).unwrap().translation;
+                    let command = generate_command(
+                        translation,
+                        recorder.start_pos.unwrap(),
+                        intersection.position().unwrap().clone(),
+                    );
+                    info!("generate command: {:?}, piece trans: {}", command, translation);
+                    move_seq.0.push_back(command);
+
+
+                    // 清除recorder
+                    recorder.clear();
+                }
+            } else {
+                panic!("Can not get end pos");
+            }
+        }
+    }
+
+    if mouse.just_released(MouseButton::Left) {
+        // 清除recorder
+        recorder.clear();
+    }
+}
+
+fn generate_command(piece_translation: Vec3, start_pos: Vec3, end_pos: Vec3) -> Command {
+    // TODO 1.5 surface的坐标值
+    if (start_pos.x.abs() - 1.5).abs() < 0.001 {
+        let delta_y = end_pos.y - start_pos.y;
+        let delta_z = end_pos.z - start_pos.z;
+        if delta_y.abs() > delta_z.abs() {
+            // y轴变化大，沿z轴旋转
+            let rotate = if delta_y > 0.0 { 1 } else { -1 };
+            if piece_translation.z.round() == -1.0 {
+                return Command(BaseMove::B, rotate);
+            } else if piece_translation.z.round() == 0.0 {
+                return Command(BaseMove::S, rotate);
+            } else {
+                return Command(BaseMove::F, rotate);
+            }
+        } else {
+            // z轴变化大，沿y轴旋转
+            let rotate = if delta_z > 0.0 { -1 } else { 1 };
+            if piece_translation.y.round() == -1.0 {
+                return Command(BaseMove::D, rotate);
+            } else if piece_translation.y.round() == 0.0 {
+                return Command(BaseMove::E, rotate);
+            } else {
+                return Command(BaseMove::U, rotate);
+            }
+        }
+    } else if (start_pos.y.abs() - 1.5).abs() < 0.001 {
+        let delta_x = end_pos.x - start_pos.x;
+        let delta_z = end_pos.z - start_pos.z;
+        if delta_x.abs() > delta_z.abs() {
+            // x轴变化大，沿z轴旋转
+            let rotate = if delta_x > 0.0 { -1 } else { 1 };
+            if piece_translation.z.round() == -1.0 {
+                return Command(BaseMove::B, rotate);
+            } else if piece_translation.z.round() == 0.0 {
+                return Command(BaseMove::S, rotate);
+            } else {
+                return Command(BaseMove::F, rotate);
+            }
+        } else {
+            // z轴变化大，沿x轴旋转
+            let rotate = if delta_z > 0.0 { 1 } else { -1 };
+            if piece_translation.x.round() == -1.0 {
+                return Command(BaseMove::L, rotate);
+            } else if piece_translation.x.round() == 0.0 {
+                return Command(BaseMove::M, rotate);
+            } else {
+                return Command(BaseMove::R, rotate);
+            }
+        }
+    } else {
+        let delta_x = end_pos.x - start_pos.x;
+        let delta_y = end_pos.y - start_pos.y;
+        if delta_x.abs() > delta_y.abs() {
+            // x轴变化大，沿y轴旋转
+            let rotate = if delta_x > 0.0 { 1 } else { -1 };
+            if piece_translation.y.round() == -1.0 {
+                return Command(BaseMove::D, rotate);
+            } else if piece_translation.y.round() == 0.0 {
+                return Command(BaseMove::E, rotate);
+            } else {
+                return Command(BaseMove::U, rotate);
+            }
+        } else {
+            // y轴变化大，沿x轴旋转
+            let rotate = if delta_y > 0.0 { -1 } else { 1 };
+            if piece_translation.x.round() == -1.0 {
+                return Command(BaseMove::L, rotate);
+            } else if piece_translation.x.round() == 0.0 {
+                return Command(BaseMove::M, rotate);
+            } else {
+                return Command(BaseMove::R, rotate);
             }
         }
     }
