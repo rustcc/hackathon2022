@@ -1,5 +1,7 @@
-use crate::core::{random_command, Command, Piece, Surface, BaseMove};
+use crate::core::{random_command, Command, Piece, Surface, BaseMove, MyRaycastSet};
 use bevy::prelude::*;
+use bevy_mod_picking::{PickableBundle, PickingCameraBundle, DefaultPickingPlugins, DebugCursorPickingPlugin, DebugEventsPickingPlugin};
+use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
 
@@ -145,7 +147,8 @@ fn create_cube_event(
                             ..Default::default()
                         })
                         .insert(Piece::new(order, x, y, z))
-                        // .insert(PickableBundle::default())
+                        .insert(PickableBundle::default())
+                        .insert(RaycastMesh::<MyRaycastSet>::default())
                         .with_children(|parent| {
                             // 生成顶部
                             if y == (order - 1) {

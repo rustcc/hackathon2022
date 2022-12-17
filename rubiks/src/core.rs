@@ -233,6 +233,9 @@ pub fn flatten(elems: Vec<Elem>) -> Vec<Command> {
     }
     v
 }
+
+pub struct MyRaycastSet;
+
 #[test]
 fn test_flatten() {
     let e = Elem::Group(vec![Command(BaseMove::U, 1), Command(BaseMove::R, 1)], -1);

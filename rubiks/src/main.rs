@@ -5,9 +5,12 @@ use bevy::prelude::*;
 use bevy::window::WindowId;
 use bevy::winit::WinitWindows;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
-use bevy_rubikscube::core::flatten;
+use bevy_rubikscube::core::{flatten, MyRaycastSet};
 use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle};
 use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
+use bevy_inspector_egui::prelude::*;
+use bevy_mod_picking::{PickableBundle, PickingCameraBundle, DefaultPickingPlugins, DebugCursorPickingPlugin, DebugEventsPickingPlugin};
+use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
 use std::io::Cursor;
 use winit::window::Icon;
 
@@ -23,6 +26,11 @@ fn main() {
     }))
     .add_plugin(EguiPlugin)
     .add_plugin(BevyRubiksCubePlugin)
+    .add_plugin(WorldInspectorPlugin::new())
+    .add_plugins(DefaultPickingPlugins)
+    .add_plugin(DebugCursorPickingPlugin)
+    .add_plugin(DebugEventsPickingPlugin)
+    .add_plugin(DefaultRaycastingPlugin::<MyRaycastSet>::default())
     .add_startup_system(set_window_icon)
     .add_system(dashboard_ui);
 
