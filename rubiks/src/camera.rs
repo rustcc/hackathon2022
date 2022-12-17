@@ -13,7 +13,7 @@ impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app
         .add_startup_system(setup)
-        .add_system(intersection)
+        // .add_system(intersection)
         .add_system_to_stage(
             CoreStage::First,
             update_raycast_with_cursor.before(RaycastSystem::BuildRays::<MyRaycastSet>),
