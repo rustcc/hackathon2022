@@ -66,12 +66,16 @@ macro_rules! impl_into_reactive {
                 Reactive::Value(t)
             }
         }
+
+        impl From<$ty> for Reactive<String> {
+            fn from(t: $ty) -> Self {
+                Reactive::Value(t.to_string())
+            }
+        }
     )*};
 }
 
-impl_into_reactive!(
-    bool, i8, u8, i16, u16, char, i32, u32, i64, u64, isize, usize, i128, u128, String
-);
+impl_into_reactive!(bool, i8, u8, i16, u16, char, i32, u32, i64, u64, isize, usize, i128, u128,);
 
 /// 为一些泛型类型实现 [`IntoReactive`]。
 macro_rules! impl_into_reactive_generic {
@@ -81,10 +85,25 @@ macro_rules! impl_into_reactive_generic {
                 Reactive::Value(t)
             }
         }
+
+        impl<T> From<$ty<T>> for Reactive<String>
+        where
+            $ty<T>: std::fmt::Display,
+        {
+            fn from(t: $ty<T>) -> Self {
+                Reactive::Value(t.to_string())
+            }
+        }
     )*};
 }
 
 impl_into_reactive_generic!(Rc, Option, Vec, RefCell, Cell);
+
+impl From<String> for Reactive<String> {
+    fn from(t: String) -> Self {
+        Reactive::Value(t)
+    }
+}
 
 impl From<&str> for Reactive<String> {
     fn from(t: &str) -> Self {

@@ -1,4 +1,4 @@
-use crate::template::GlobalTemplates;
+use crate::{create_root, template::GlobalTemplates, GenericComponent, Scope};
 use js_sys::Reflect;
 use wasm_bindgen::{prelude::*, JsCast, JsValue};
 use web_sys::HtmlTemplateElement;
@@ -6,6 +6,7 @@ use web_sys::HtmlTemplateElement;
 thread_local! {
     static WINDOW: web_sys::Window = web_sys::window().unwrap();
     static DOCUMENT: web_sys::Document = WINDOW.with(web_sys::Window::document).unwrap();
+    static BODY: web_sys::HtmlElement = DOCUMENT.with(web_sys::Document::body).unwrap();
     static DOM_TEMPLATES: GlobalTemplates<DomNode> = GlobalTemplates::default();
 }
 
@@ -121,9 +122,10 @@ impl GenericNode for DomNode {
                         template
                             .set_attribute("data-akun-template-id", data)
                             .unwrap_throw_val();
-                        let body = doc.body().unwrap_throw();
-                        body.insert_before(&template, body.first_child().as_ref())
-                            .unwrap_throw_val();
+                        BODY.with(|body| {
+                            body.insert_before(&template, body.first_child().as_ref())
+                                .unwrap_throw_val();
+                        });
                     }
                     template
                         .unchecked_into::<HtmlTemplateElement>()
@@ -221,4 +223,21 @@ impl GenericNode for DomNode {
             .insert_before(&new_node.node, ref_node.map(|node| &node.node))
             .unwrap_throw_val();
     }
+}
+
+pub fn render_to_body<C>(f: impl FnOnce(Scope) -> C)
+where
+    C: GenericComponent<DomNode>,
+{
+    BODY.with(|body| render_to(body, f));
+}
+
+pub fn render_to<C>(root: &web_sys::Node, f: impl FnOnce(Scope) -> C)
+where
+    C: GenericComponent<DomNode>,
+{
+    let (_, disposer) = create_root(|cx| {
+        f(cx).render_to(&DomNode::from(root.clone()));
+    });
+    std::mem::forget(disposer);
 }
