@@ -278,10 +278,10 @@ impl Move {
 
     pub fn axis(&self) -> Vec3 {
         match self {
-            Move::U(_) => Vec3::Y,
-            Move::L(_) => Vec3::X,
-            Move::F(_) => Vec3::Z,
-            Move::R(_) => Vec3::X,
+            Move::U(_) => -Vec3::Y,
+            Move::L(_) => -Vec3::X,
+            Move::F(_) => -Vec3::Z,
+            Move::R(_) => -Vec3::X,
             Move::B(_) => Vec3::Z,
             Move::D(_) => Vec3::Y,
             Move::X(_) => Vec3::X,

@@ -62,18 +62,18 @@ fn dashboard_ui(
     mut timekeeping_timer: ResMut<TimekeepingTimer>,
 ) {
     egui::Window::new("Dashboard").show(egui_context.ctx_mut(), |ui| {
-        // egui::ComboBox::from_label("Cubes")
-        //     .selected_text(format!("{0}x{0}", cube_settings.cube_order))
-        //     .show_ui(ui, |ui| {
-        //         for i in 2..=10u8 {
-        //             if ui
-        //                 .selectable_value(&mut cube_settings.cube_order, i, format!("{i}x{i}"))
-        //                 .clicked()
-        //             {
-        //                 create_ev.send(CreateCube::new(i));
-        //             }
-        //         }
-        //     });
+        egui::ComboBox::from_label("Cubes")
+            .selected_text(format!("{0}x{0}", cube_settings.cube.size()))
+            .show_ui(ui, |ui| {
+                for i in 2..=10i32 {
+                    if ui
+                        .selectable_value(&mut cube_settings.cube.size(), i, format!("{i}x{i}"))
+                        .clicked()
+                    {
+                        create_ev.send(CreateCube::new(i));
+                    }
+                }
+            });
 
         // ui.separator();
         egui::Grid::new("commands_grid")
@@ -144,6 +144,16 @@ fn dashboard_ui(
                 {
                     rand_ev.send(RandomPuzzle);
                 }
+
+                if cube_settings.cube.size() == 3 {
+                    if ui
+                        .add_sized([100.0, 30.0], egui::Button::new("Solver"))
+                        .clicked()
+                    {
+                        solve_ev.send(SolvePuzzle);
+                    }
+                }
+
                 ui.end_row();
             });
     });

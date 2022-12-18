@@ -1,18 +1,16 @@
 use crate::core::{BaseMove, Command, MyRaycastSet, Piece, Surface};
 use bevy::prelude::*;
-use bevy_mod_picking::{
-    DebugCursorPickingPlugin, DebugEventsPickingPlugin, DefaultPickingPlugins, PickableBundle,
-    PickingCameraBundle, PickingEvent,
-};
-use bevy_mod_raycast::{
-    DefaultRaycastingPlugin, Intersection, RaycastMesh, RaycastMethod, RaycastSource, RaycastSystem,
-};
+use bevy_mod_picking::PickableBundle;
+use bevy_mod_raycast::RaycastMesh;
 
 use rubiks_solver::prelude::ORDERED_FACES;
 use rubiks_solver::{rand_moves, solve, Cube, Face, FaceletCube, Move, MoveVariant};
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
 use std::time::Instant;
+
+/// 显示的模块的尺寸
+const BOX_SIZE: f32 = 1.0;
 
 /// 可视化插件
 pub struct ViewerPlugin;
@@ -173,7 +171,7 @@ fn create_cube_event(
         let cube_size = ev.size as u8;
 
         cube_settings.cube = FaceletCube::new(ev.size);
-        let border = (cube_size as f32) / 2.0 - 0.5;
+        let border = (cube_size as f32 * BOX_SIZE) / 2.0 - 0.5 * BOX_SIZE;
 
         // 生成魔方
         for x in 0..cube_size {
@@ -182,7 +180,7 @@ fn create_cube_event(
                     let piece = Piece::new(cube_size, x, y, z);
                     commands
                         .spawn(PbrBundle {
-                            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
+                            mesh: meshes.add(Mesh::from(shape::Cube { size: BOX_SIZE })),
                             material: materials.add(StandardMaterial {
                                 base_color: Color::BLACK,
                                 alpha_mode: AlphaMode::Blend,
@@ -190,9 +188,9 @@ fn create_cube_event(
                                 ..default()
                             }),
                             transform: Transform::from_xyz(
-                                x as f32 - border,
-                                y as f32 - border,
-                                z as f32 - border,
+                                x as f32 * BOX_SIZE - border,
+                                y as f32 * BOX_SIZE - border,
+                                z as f32 * BOX_SIZE - border,
                             ),
                             ..Default::default()
                         })
@@ -230,44 +228,43 @@ fn spawn_sticker(
     cube_settings: &CubeSettings,
     face: Face,
 ) {
-    let size = 1.0;
     // 贴纸颜色的大小， 比块小一点
-    let square_size = 0.9;
+    let square_size = 0.9 * BOX_SIZE;
     let check = match face {
         Face::U => {
             // 上面
             Some((
                 cube_settings.top_color,
-                Transform::from_xyz(0.0, size * 0.5 + 0.01, 0.0),
+                Transform::from_xyz(0.0, BOX_SIZE * 0.5 + 0.01, 0.0),
             ))
         }
         Face::D => {
             // 下面
-            let mut pos = Transform::from_xyz(0.0, -size * 0.5 - 0.01, 0.0);
+            let mut pos = Transform::from_xyz(0.0, -BOX_SIZE * 0.5 - 0.01, 0.0);
             pos.rotate_x(PI);
             Some((cube_settings.bottom_color, pos))
         }
         Face::L => {
             // 左面
-            let mut pos = Transform::from_xyz(-size * 0.5 - 0.01, 0.0, 0.0);
+            let mut pos = Transform::from_xyz(-BOX_SIZE * 0.5 - 0.01, 0.0, 0.0);
             pos.rotate_z(FRAC_PI_2);
             Some((cube_settings.left_color, pos))
         }
         Face::R => {
             // 右面
-            let mut pos = Transform::from_xyz(size * 0.5 + 0.01, 0.0, 0.0);
+            let mut pos = Transform::from_xyz(BOX_SIZE * 0.5 + 0.01, 0.0, 0.0);
             pos.rotate_z(-FRAC_PI_2);
             Some((cube_settings.right_color, pos))
         }
         Face::F => {
             // 前面
-            let mut pos = Transform::from_xyz(0.0, 0.0, size * 0.5 + 0.01);
+            let mut pos = Transform::from_xyz(0.0, 0.0, BOX_SIZE * 0.5 + 0.01);
             pos.rotate_x(FRAC_PI_2);
             Some((cube_settings.front_color, pos))
         }
         Face::B => {
             // 后面
-            let mut pos = Transform::from_xyz(0.0, 0.0, -size * 0.5 - 0.01);
+            let mut pos = Transform::from_xyz(0.0, 0.0, -BOX_SIZE * 0.5 - 0.01);
             pos.rotate_x(-FRAC_PI_2);
             Some((cube_settings.back_color, pos))
         }
@@ -304,14 +301,21 @@ fn move_piece(
     time: Res<Time>,
 ) {
     if executing_cmd.left_angle == 0.0 {
-        update_ev.send(UpdateSurface);
         // 读取下一个指令
         if let Some(command) = move_seq.pop_front() {
             executing_cmd.command = command;
             executing_cmd.left_angle = command.angle();
             cube_settings.cube = cube_settings.cube.apply_move(command);
+            let quat =
+                Quat::from_axis_angle(executing_cmd.command.axis(), executing_cmd.left_angle);
 
-            info!("执行指令: {} {}", command, command.angle().to_degrees());
+            for (mut transform, piece) in q_pieces.iter_mut() {
+                if piece.is_selected(&executing_cmd.command) {
+                    transform.rotate_around(Vec3::ZERO, quat);
+                }
+            }
+            executing_cmd.left_angle = 0.0;
+            info!("执行指令: {}", command);
         }
     } else {
         let clockwise = executing_cmd.command.clockwise();
@@ -368,13 +372,14 @@ fn update_surface(
     cube_settings: Res<CubeSettings>,
 ) {
     for _ in update_ev.iter() {
-        let order = cube_settings.cube.size();
-        let border = (order as f32) / 2.0 - 0.5;
+        let cube_size = cube_settings.cube.size();
+        let border = (cube_size as f32 * BOX_SIZE) / 2.0 - 0.5 * BOX_SIZE;
 
         for (transform, mut piece) in q_plane.iter_mut() {
-            piece.x = (transform.translation.x.round() + border) as u8;
-            piece.y = (transform.translation.y.round() + border) as u8;
-            piece.z = (transform.translation.z.round() + border) as u8;
+            piece.x = ((transform.translation.x + border).round() / BOX_SIZE) as u8;
+            piece.y = ((transform.translation.y + border).round() / BOX_SIZE) as u8;
+            piece.z = ((transform.translation.z + border).round() / BOX_SIZE) as u8;
+            info!("{border} y from {} to {}", transform.translation.y, piece.y);
         }
     }
 }
