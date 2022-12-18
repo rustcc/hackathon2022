@@ -1,5 +1,11 @@
 #![allow(clippy::type_complexity)]
 
+#[doc(hidden)]
+#[path = "private.rs"]
+pub mod __private;
+
+#[macro_use]
+mod macros;
 #[macro_use]
 mod utils;
 mod component;
