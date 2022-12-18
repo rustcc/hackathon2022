@@ -45,16 +45,7 @@ async fn main() -> Result<()> {
     // 添加中间件
     router = webase::router::layer(router);
 
-    info!(
-        "[inner] http://{}:{}/static/resources/dist/index.html",
-        webase::util::ip::find_inner_ip(),
-        args.port
-    );
-    info!(
-        "[public] http://{}:{}/static/resources/dist/index.html",
-        webase::util::ip::find_public_ip().await?,
-        args.port
-    );
+    info!("listen in http://127.0.0.1:{}", args.port);
     app(args.port, router).await?;
     Ok(())
 }

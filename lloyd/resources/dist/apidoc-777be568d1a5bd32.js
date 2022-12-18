@@ -559,7 +559,7 @@ function initSync(module) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('apidoc-cea786c9c1865f88_bg.wasm', import.meta.url);
+        input = new URL('apidoc-777be568d1a5bd32_bg.wasm', import.meta.url);
     }
     const imports = getImports();
 
