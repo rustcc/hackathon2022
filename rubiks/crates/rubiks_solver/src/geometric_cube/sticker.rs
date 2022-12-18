@@ -1,8 +1,7 @@
 use derive_more::Display;
 use glam::{DVec3, IVec3};
 
-use crate::generic_cube::CubeSize;
-use crate::generic_cube::Face;
+use crate::generic_cube::{CubeSize, Face};
 use crate::geometric_cube::moves::GeometricMove;
 
 #[derive(Copy, Clone, Display, Eq, Hash, PartialEq)]
@@ -38,11 +37,13 @@ impl Sticker {
         }
 
         let rotation_matrix = mv.get_rotation_matrix();
-        let new_position = rotation_matrix.mul_vec3(DVec3::new(
-            self.current.x as f64,
-            self.current.y as f64,
-            self.current.z as f64,
-        ));
+
+        let new_position = rotation_matrix
+            * DVec3::new(
+                self.current.x as f64,
+                self.current.y as f64,
+                self.current.z as f64,
+            );
 
         Self {
             current: IVec3 {

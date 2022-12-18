@@ -1,9 +1,10 @@
 use glam::DMat3;
 
 use crate::generic_cube::Move::*;
-use crate::generic_cube::MoveVariant::Inverse;
+use crate::generic_cube::MoveVariant::*;
 use crate::generic_cube::{CubeSize, Move, MoveVariant};
-use crate::geometric_cube::Sticker;
+
+use super::sticker::Sticker;
 
 pub struct GeometricMove {
     axis: Axis,
@@ -14,9 +15,9 @@ pub struct GeometricMove {
 impl GeometricMove {
     pub fn get_rotation_matrix(&self) -> DMat3 {
         match self.axis {
-            Axis::X => DMat3::from_rotation_x(-self.angle),
-            Axis::Y => DMat3::from_rotation_y(-self.angle),
-            Axis::Z => DMat3::from_rotation_z(-self.angle),
+            Axis::X => DMat3::from_rotation_x(-self.angle.to_radians()),
+            Axis::Y => DMat3::from_rotation_y(-self.angle.to_radians()),
+            Axis::Z => DMat3::from_rotation_z(-self.angle.to_radians()),
         }
     }
 
@@ -62,7 +63,6 @@ fn u_move(n: CubeSize) -> GeometricMove {
         ..y_move()
     }
 }
-
 fn d_move(n: CubeSize) -> GeometricMove {
     modify_move(
         GeometricMove {
@@ -72,7 +72,6 @@ fn d_move(n: CubeSize) -> GeometricMove {
         Inverse,
     )
 }
-
 fn y_move() -> GeometricMove {
     GeometricMove {
         axis: Axis::Y,
@@ -90,14 +89,12 @@ fn l_move(n: CubeSize) -> GeometricMove {
         Inverse,
     )
 }
-
 fn r_move(n: CubeSize) -> GeometricMove {
     GeometricMove {
         predicate: Box::new(move |s| s.current.x >= s.size - (n * 2)),
         ..x_move()
     }
 }
-
 fn x_move() -> GeometricMove {
     GeometricMove {
         axis: Axis::X,
@@ -112,7 +109,6 @@ fn f_move(n: CubeSize) -> GeometricMove {
         ..z_move()
     }
 }
-
 fn b_move(n: CubeSize) -> GeometricMove {
     modify_move(
         GeometricMove {
@@ -122,7 +118,6 @@ fn b_move(n: CubeSize) -> GeometricMove {
         Inverse,
     )
 }
-
 fn z_move() -> GeometricMove {
     GeometricMove {
         axis: Axis::Z,

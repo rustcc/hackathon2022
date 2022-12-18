@@ -28,6 +28,7 @@ bevy_mod_raycast = "0.7.0"
 bevy-inspector-egui = "0.14.0"
 nom = "7"
 rand = "0.8.5"
+rubiks_solver = { path = "crates/rubiks_solver" }
 
 winit = { version = "0.27", default-features = false }
 image = { version = "0.24", default-features = false }

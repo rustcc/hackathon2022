@@ -85,7 +85,10 @@ pub struct ExecutingCommand {
 
 impl Default for ExecutingCommand {
     fn default() -> Self {
-        Self { command: Command(BaseMove::U, 0), left_angle: 0.0 }
+        Self {
+            command: Command(BaseMove::U, 0),
+            left_angle: 0.0,
+        }
     }
 }
 
@@ -130,7 +133,7 @@ impl MouseDraggingRecorder {
 #[derive(Debug, PartialEq, Eq)]
 pub enum PlayMode {
     // 练习模式
-    Practice, 
+    Practice,
     // 计时模式
     Timekeeping
 }
@@ -340,8 +343,8 @@ fn move_piece(
     } else {
         let clockwise = executing_cmd.command.clockwise();
         let mut angle = match clockwise {
-            true => { cube_settings.rotate_speed * PI * time.delta_seconds() },
-            false => { -cube_settings.rotate_speed * PI * time.delta_seconds() },
+            true => cube_settings.rotate_speed * PI * time.delta_seconds(),
+            false => -cube_settings.rotate_speed * PI * time.delta_seconds(),
         };
         let left_angle = executing_cmd.left_angle;
         let mut new_left_angle = left_angle - angle;
