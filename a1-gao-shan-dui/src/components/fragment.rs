@@ -58,6 +58,10 @@ pub fn Fragment<N: GenericNode>(_: Scope) -> Fragment<N> {
 }
 
 impl<N: GenericNode> Fragment<N> {
+    pub fn build(self) -> Self {
+        self
+    }
+
     /// 向此片段中添加一个组件。
     pub fn child<C: GenericComponent<N>>(mut self, child: C) -> Self {
         let Template { init, render } = child.build_template();

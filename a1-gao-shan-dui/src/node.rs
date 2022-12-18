@@ -19,11 +19,11 @@ impl<T> UnwrapThrowValExt<T> for Result<T, wasm_bindgen::JsValue> {
     }
 }
 
-type Str = &'static str;
+type StaticStr = &'static str;
 
 /// 处理一个节点引发的事件。
 pub struct EventHandler {
-    handler: Box<dyn FnMut(web_sys::Event)>,
+    pub handler: Box<dyn FnMut(web_sys::Event)>,
 }
 
 /// 呈现视图的核心机制，也是视图中的最小单元。如不特殊指出，一个节点的复制应该是
@@ -39,19 +39,22 @@ pub trait GenericNode: 'static + Clone + Eq {
     fn deep_clone(&self) -> Self;
 
     /// 设定节点的固有属性，对于 Dom 节点，大部分属性通过此方法进行更新。
-    fn set_property(&self, name: Str, val: Str);
+    fn set_property(&self, name: &str, val: &str);
 
     /// 设定节点的任意属性，对于 Dom 节点，`data-*` 属性通过此方法进行更新。
-    fn set_attribute(&self, name: Str, val: Str);
+    fn set_attribute(&self, name: &str, val: &str);
+
+    /// 设定节点内部文本。
+    fn set_inner_text(&self, data: &str);
 
     /// 向节点中添加一个 `class`。
-    fn add_class(&self, name: Str);
+    fn add_class(&self, name: &str);
 
     /// 移除节点中的某个 `class`。
-    fn remove_class(&self, name: Str);
+    fn remove_class(&self, name: &str);
 
     /// 监听节点的某个事件。
-    fn listen_event(&self, event: Str, handler: EventHandler);
+    fn listen_event(&self, event: &str, handler: EventHandler);
 
     /// 返回某个节点的父级。
     fn parent(&self) -> Option<Self>;
@@ -78,15 +81,15 @@ pub trait GenericNode: 'static + Clone + Eq {
 /// 节点类型。
 pub enum NodeType {
     /// 带有标签的节点，通常是 HTML 元素。
-    Tag(Str),
+    Tag(StaticStr),
     /// 文本节点。
-    Text(Str),
+    Text(StaticStr),
     /// 占位符，通常被动态组件用来确定挂载的位置。
-    Placeholder(Str),
+    Placeholder(StaticStr),
     /// 模板节点，对模板节点内容的修改不应该影响实际呈现的视图，通常是 [`DocumentFragment`]。
     ///
     /// [`DocumentFragment`]: web_sys::DocumentFragment
-    Template(Str),
+    Template(StaticStr),
 }
 
 #[derive(Clone, Eq, PartialEq)]
@@ -140,7 +143,7 @@ impl GenericNode for DomNode {
         }
     }
 
-    fn set_property(&self, name: Str, attr: Str) {
+    fn set_property(&self, name: &str, attr: &str) {
         Reflect::set(
             &self.node,
             &JsValue::from_str(name),
@@ -149,14 +152,18 @@ impl GenericNode for DomNode {
         .unwrap_throw_val();
     }
 
-    fn set_attribute(&self, name: Str, val: Str) {
+    fn set_attribute(&self, name: &str, val: &str) {
         self.node
             .unchecked_ref::<web_sys::Element>()
             .set_attribute(name, val)
             .unwrap_throw_val();
     }
 
-    fn add_class(&self, name: Str) {
+    fn set_inner_text(&self, data: &str) {
+        self.node.set_text_content(Some(data));
+    }
+
+    fn add_class(&self, name: &str) {
         self.node
             .unchecked_ref::<web_sys::Element>()
             .class_list()
@@ -164,7 +171,7 @@ impl GenericNode for DomNode {
             .unwrap_throw_val();
     }
 
-    fn remove_class(&self, name: Str) {
+    fn remove_class(&self, name: &str) {
         self.node
             .unchecked_ref::<web_sys::Element>()
             .class_list()
@@ -172,7 +179,7 @@ impl GenericNode for DomNode {
             .unwrap_throw_val();
     }
 
-    fn listen_event(&self, event: Str, handler: EventHandler) {
+    fn listen_event(&self, event: &str, handler: EventHandler) {
         self.node
             .add_event_listener_with_callback(
                 event,

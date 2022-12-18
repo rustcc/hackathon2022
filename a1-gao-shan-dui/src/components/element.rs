@@ -60,6 +60,10 @@ pub fn Element<N: GenericNode>(cx: Scope) -> Element<N> {
 }
 
 impl<N: GenericNode> Element<N> {
+    pub fn build(self) -> Self {
+        self
+    }
+
     /// 设定此组件的根节点。
     pub fn root<E: GenericElement<N>>(self, render: impl 'static + FnOnce(E) -> E) -> Self {
         self.root_with::<E>(move |el| View::node(render(el).into_node()))

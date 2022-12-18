@@ -8,7 +8,6 @@ mod node;
 mod reactive;
 mod view;
 
-pub mod template;
 pub mod components {
     mod element;
     mod fragment;
@@ -16,13 +15,20 @@ pub mod components {
     pub use element::Element;
     pub use fragment::Fragment;
 }
+pub mod elements;
+pub mod template;
 
 #[doc(inline)]
 pub use {
     component::{DynComponent, GenericComponent},
     components::*,
     element::GenericElement,
-    node::{EventHandler, GenericNode, NodeType},
+    node::{DomNode, EventHandler, GenericNode, NodeType},
     reactive::{create_root, untrack, Effect, Scope, ScopeDisposer, Signal},
     view::View,
 };
+
+/// 创建一个元素组件 [`struct@Element`]。
+pub fn view<N: GenericNode>(cx: Scope) -> Element<N> {
+    Element(cx)
+}
