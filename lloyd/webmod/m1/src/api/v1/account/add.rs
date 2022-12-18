@@ -77,7 +77,7 @@ impl Header for H {
     }
 }
 
-#[post(name = "选择商品")]
+#[post(name = "选择商品", url = "/add/acount/:p1/:p2", note = "lllll")]
 pub async fn handle(
     ValidPath(_path): ValidPath<P>,
     ValidQuery(_query): ValidQuery<Q>,
