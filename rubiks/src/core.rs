@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rubiks_solver::Face;
 use std::f32::consts::{FRAC_PI_2, PI};
 use std::fmt::{Display, Formatter};
 
@@ -7,7 +8,7 @@ use std::fmt::{Display, Formatter};
 #[reflect(Component)]
 pub struct Piece {
     /// 是几阶的魔方
-    pub order: u8,
+    pub size: u8,
     /// x
     pub x: u8,
     /// y
@@ -17,40 +18,47 @@ pub struct Piece {
 }
 
 impl Piece {
-    pub fn new(order: u8, x: u8, y: u8, z: u8) -> Self {
-        Piece { order, x, y, z }
+    pub fn new(size: u8, x: u8, y: u8, z: u8) -> Self {
+        Piece { size, x, y, z }
     }
 
     /// 判断是不是需要旋转的块
     pub fn is_selected(&self, command: &Command) -> bool {
         match command.0 {
-            BaseMove::U => self.y == self.order - 1,
+            BaseMove::U => self.y == self.size - 1,
             BaseMove::L => self.x == 0,
-            BaseMove::F => self.z == self.order - 1,
-            BaseMove::R => self.x == self.order - 1,
+            BaseMove::F => self.z == self.size - 1,
+            BaseMove::R => self.x == self.size - 1,
             BaseMove::B => self.z == 0,
             BaseMove::D => self.y == 0,
-            BaseMove::M => self.x == self.order / 2,
-            BaseMove::E => self.y == self.order / 2,
-            BaseMove::S => self.z == self.order / 2,
+            BaseMove::M => self.x == self.size / 2,
+            BaseMove::E => self.y == self.size / 2,
+            BaseMove::S => self.z == self.size / 2,
             BaseMove::X => true,
             BaseMove::Y => true,
             BaseMove::Z => true,
         }
     }
+
+    /// 检查块的颜色
+    pub fn has_face(&self, face: Face) -> bool {
+        match face {
+            Face::U => self.y == self.size - 1,
+            Face::L => self.x == 0,
+            Face::F => self.z == self.size - 1,
+            Face::R => self.x == self.size - 1,
+            Face::B => self.z == 0,
+            Face::D => self.y == 0,
+            _ => false,
+        }
+    }
 }
 
 /// 表面
-#[derive(Component, Reflect, FromReflect, PartialEq, Eq, Clone, Copy, Debug, Hash, Default)]
-#[reflect(Component)]
-pub enum Surface {
-    #[default]
-    U,
-    D,
-    L,
-    R,
-    F,
-    B,
+#[derive(Component, PartialEq, Eq, Clone, Copy, Debug, Hash)]
+pub struct Surface {
+    pub current: Face,
+    pub initial: Face,
 }
 
 /// 旋转方向

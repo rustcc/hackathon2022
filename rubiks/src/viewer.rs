@@ -33,7 +33,7 @@ impl Plugin for ViewerPlugin {
 #[derive(Debug, Resource)]
 pub struct CubeSettings {
     /// 是几阶的魔方
-    pub cube_order: u8,
+    pub cube_size: i32,
     /// 块的大小
     pub piece_size: f32,
     /// 前面的颜色
@@ -57,7 +57,7 @@ pub struct CubeSettings {
 impl Default for CubeSettings {
     fn default() -> Self {
         Self {
-            cube_order: 3,
+            cube_size: 3,
             piece_size: 1.0,
             front_color: Color::GREEN,
             back_color: Color::BLUE,
@@ -79,7 +79,7 @@ pub struct MoveSequence(pub VecDeque<Command>);
 #[derive(Resource)]
 pub struct ExecutingCommand {
     pub command: Command,
-    // 剩余待旋转的弧度
+    /// 剩余待旋转的弧度
     pub left_angle: f32,
 }
 
@@ -95,19 +95,19 @@ impl Default for ExecutingCommand {
 /// 生成魔方事件
 #[derive(Debug)]
 pub struct CreateCube {
-    number: u8,
+    size: i32,
 }
 
 impl Default for CreateCube {
     fn default() -> Self {
-        Self { number: 3 }
+        Self { size: 3 }
     }
 }
 
 impl CreateCube {
-    pub fn new(number: u8) -> Self {
+    pub fn new(number: i32) -> Self {
         assert!((2..=10).contains(&number));
-        Self { number }
+        Self { size: number }
     }
 }
 
@@ -155,15 +155,19 @@ fn create_cube_event(
         for entity in q_old_cubes.iter() {
             commands.entity(entity).despawn_recursive();
         }
-        cube_settings.cube_order = ev.number;
-        let order = cube_settings.cube_order;
+        cube_settings.cube_size = ev.size;
+        let cube_size = cube_settings.cube_size as u8;
         let size = cube_settings.piece_size;
-        let border = (order as f32 * size) / 2.0 - 0.5;
+        let border = (cube_size as f32 * size) / 2.0 - 0.5;
+
+        let cube = GeoCube::new(ev.size);
+        info!("{:?}", cube.state());
 
         // 生成魔方
-        for x in 0..order {
-            for z in 0..order {
-                for y in 0..order {
+        for x in 0..cube_size {
+            for z in 0..cube_size {
+                for y in 0..cube_size {
+                    let piece = Piece::new(cube_size, x, y, z);
                     commands
                         .spawn(PbrBundle {
                             mesh: meshes.add(Mesh::from(shape::Cube { size })),
@@ -180,74 +184,21 @@ fn create_cube_event(
                             ),
                             ..Default::default()
                         })
-                        .insert(Piece::new(order, x, y, z))
+                        .insert(piece)
                         .insert(PickableBundle::default())
                         .insert(RaycastMesh::<MyRaycastSet>::default())
                         .with_children(|parent| {
-                            // 生成顶部
-                            if y == (order - 1) {
-                                spawn_piece(
-                                    parent,
-                                    &mut meshes,
-                                    &mut materials,
-                                    &cube_settings,
-                                    Surface::U,
-                                );
-                            }
-
-                            // 生成底部
-                            if y == 0 {
-                                spawn_piece(
-                                    parent,
-                                    &mut meshes,
-                                    &mut materials,
-                                    &cube_settings,
-                                    Surface::D,
-                                );
-                            }
-
-                            // 生成左侧
-                            if x == 0 {
-                                spawn_piece(
-                                    parent,
-                                    &mut meshes,
-                                    &mut materials,
-                                    &cube_settings,
-                                    Surface::L,
-                                );
-                            }
-
-                            // 生成右侧
-                            if x == (order - 1) {
-                                spawn_piece(
-                                    parent,
-                                    &mut meshes,
-                                    &mut materials,
-                                    &cube_settings,
-                                    Surface::R,
-                                );
-                            }
-
-                            // 生成前部
-                            if z == (order - 1) {
-                                spawn_piece(
-                                    parent,
-                                    &mut meshes,
-                                    &mut materials,
-                                    &cube_settings,
-                                    Surface::F,
-                                );
-                            }
-
-                            // 生成后部
-                            if z == 0 {
-                                spawn_piece(
-                                    parent,
-                                    &mut meshes,
-                                    &mut materials,
-                                    &cube_settings,
-                                    Surface::B,
-                                );
+                            // 创建对应的贴纸
+                            for face in ORDERED_FACES {
+                                if piece.has_face(face) {
+                                    spawn_sticker(
+                                        parent,
+                                        &mut meshes,
+                                        &mut materials,
+                                        &cube_settings,
+                                        face,
+                                    );
+                                }
                             }
                         });
                 }
@@ -259,68 +210,75 @@ fn create_cube_event(
 }
 
 /// 创建块的辅助方法
-fn spawn_piece(
+fn spawn_sticker(
     parent: &mut ChildBuilder,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     cube_settings: &CubeSettings,
-    surface: Surface,
-) -> Entity {
+    face: Face,
+) {
     let size = cube_settings.piece_size;
     // 贴纸颜色的大小， 比块小一点
     let square_size = cube_settings.piece_size * 0.9;
-    let (color, pos) = match surface {
-        Surface::U => {
+    let check = match face {
+        Face::U => {
             // 上面
-            (
+            Some((
                 cube_settings.top_color,
                 Transform::from_xyz(0.0, size * 0.5 + 0.01, 0.0),
-            )
+            ))
         }
-        Surface::D => {
+        Face::D => {
             // 下面
             let mut pos = Transform::from_xyz(0.0, -size * 0.5 - 0.01, 0.0);
             pos.rotate_x(PI);
-            (cube_settings.bottom_color, pos)
+            Some((cube_settings.bottom_color, pos))
         }
-        Surface::L => {
+        Face::L => {
             // 左面
             let mut pos = Transform::from_xyz(-size * 0.5 - 0.01, 0.0, 0.0);
             pos.rotate_z(FRAC_PI_2);
-            (cube_settings.left_color, pos)
+            Some((cube_settings.left_color, pos))
         }
-        Surface::R => {
+        Face::R => {
             // 右面
             let mut pos = Transform::from_xyz(size * 0.5 + 0.01, 0.0, 0.0);
             pos.rotate_z(-FRAC_PI_2);
-            (cube_settings.right_color, pos)
+            Some((cube_settings.right_color, pos))
         }
-        Surface::F => {
+        Face::F => {
             // 前面
             let mut pos = Transform::from_xyz(0.0, 0.0, size * 0.5 + 0.01);
             pos.rotate_x(FRAC_PI_2);
-            (cube_settings.front_color, pos)
+            Some((cube_settings.front_color, pos))
         }
-        Surface::B => {
+        Face::B => {
             // 后面
             let mut pos = Transform::from_xyz(0.0, 0.0, -size * 0.5 - 0.01);
             pos.rotate_x(-FRAC_PI_2);
-            (cube_settings.back_color, pos)
+            Some((cube_settings.back_color, pos))
         }
+
+        Face::X => None,
     };
-    parent
-        .spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Plane { size: square_size })),
-            material: materials.add(StandardMaterial {
-                base_color: color,
-                unlit: true,
-                ..default()
-            }),
-            transform: pos,
-            ..Default::default()
-        })
-        .insert(surface)
-        .id()
+
+    if let Some((color, pos)) = check {
+        parent
+            .spawn(PbrBundle {
+                mesh: meshes.add(Mesh::from(shape::Plane { size: square_size })),
+                material: materials.add(StandardMaterial {
+                    base_color: color,
+                    unlit: true,
+                    ..default()
+                }),
+                transform: pos,
+                ..Default::default()
+            })
+            .insert(Surface {
+                current: face,
+                initial: face,
+            });
+    }
 }
 
 /// 旋转魔方
@@ -373,13 +331,9 @@ fn move_piece(
     }
 }
 
-fn random_puzzle(
-    mut ev: EventReader<RandomPuzzle>,
-    mut cmd_ev: ResMut<MoveSequence>,
-    cube_settings: Res<CubeSettings>,
-) {
+fn random_puzzle(mut ev: EventReader<RandomPuzzle>, mut cmd_ev: ResMut<MoveSequence>) {
     for _ in ev.iter() {
-        let cmds = random_command(cube_settings.cube_order as usize);
+        let cmds = random_command(10);
         for command in cmds {
             cmd_ev.push_back(command);
         }
@@ -389,17 +343,27 @@ fn random_puzzle(
 /// 通过检查块的空间坐标，判断块的面
 fn update_surface(
     mut update_ev: EventReader<UpdateSurface>,
-    mut q_plane: Query<(&Transform, &mut Piece)>,
+    mut q_plane: Query<(&Transform, &mut Piece, &Children)>,
+    mut q_surface: Query<&mut Surface>,
     cube_settings: Res<CubeSettings>,
 ) {
     for _ in update_ev.iter() {
-        let order = cube_settings.cube_order;
+        let order = cube_settings.cube_size;
         let size = cube_settings.piece_size;
         let border = (order as f32 * size) / 2.0 - 0.5;
-        for (transform, mut piece) in q_plane.iter_mut() {
+        for (transform, mut piece, children) in q_plane.iter_mut() {
             piece.x = (transform.translation.x.round() + border) as u8;
             piece.y = (transform.translation.y.round() + border) as u8;
             piece.z = (transform.translation.z.round() + border) as u8;
+            for &child in children.iter() {
+                if let Ok(mut surface) = q_surface.get_mut(child) {
+                    for face in ORDERED_FACES {
+                        if piece.has_face(face) {
+                            surface.current = face;
+                        }
+                    }
+                }
+            }
         }
     }
 }
