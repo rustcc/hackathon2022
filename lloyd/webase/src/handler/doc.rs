@@ -1,5 +1,3 @@
-pub mod list;
-
 use std::sync::Arc;
 
 use axum::{extract::State, Json};

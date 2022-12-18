@@ -94,8 +94,33 @@ pub fn enumerable(input: TokenStream) -> TokenStream {
             }
         }
 
+        impl EnumFrom<Option<&String>> for #enum_name {
+            fn enum_by(opt: Option<&String>) -> Option<Self> {
+                match opt {
+                    Some(value) => {
+                        let value = value.as_str();
+                        match value {
+                            #from_str_quote
+                            _ => None,
+                        }
+                    },
+                    None => None,
+                }
+            }
+        }
+
         impl EnumFrom<&str> for #enum_name {
             fn enum_by(value: &str) -> Option<Self> {
+                match value {
+                    #from_str_quote
+                    _ => None,
+                }
+            }
+        }
+
+        impl EnumFrom<&String> for #enum_name {
+            fn enum_by(value: &String) -> Option<Self> {
+                let value = value.as_str();
                 match value {
                     #from_str_quote
                     _ => None,

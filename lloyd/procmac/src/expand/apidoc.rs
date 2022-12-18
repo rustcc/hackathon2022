@@ -904,7 +904,7 @@ fn validate_token_stream(validates: &Vec<ValidateItem>) -> TokenStream {
                 };
             }
             super::validator::ValidateType::Regex(lit) => {
-                let message = format!("regex({})", lit_to_string(lit));
+                let message = lit_to_string(lit);
                 validate_quote = quote! {
                     #validate_quote ValidateType::Regex(#message.into()),
                 };

@@ -4,7 +4,7 @@ use crate::state::AppState;
 use procmac::get;
 use structopt::clap::crate_name;
 
-#[get(name = "健康检查", auth = false, power = false)]
+#[get(name = "健康检查", url = "/health", auth = false, power = false)]
 pub async fn handle() -> ApiBody<String> {
     data(Some("ok".to_string()))
 }

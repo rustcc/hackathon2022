@@ -37,9 +37,9 @@ pub fn MemberRow<'a, G: Html>(
                     let mut result = String::default();
                     for s in descs {
                         if ty == ApiFieldType::Number {
-                            result = format!("{}:{}; ", s.id, s.note);
+                            result = format!("{} {}:{};", result, s.id, s.note);
                         } else {
-                            result = format!("{}:{}; ", s.name, s.note);
+                            result = format!("{} {}:{};", result, s.name, s.note);
                         }
                     }
                     result = format!("Enumer({})", result);
