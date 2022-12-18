@@ -12,3 +12,7 @@ lazy_static = "1.4.0"
 glam = "0.22.0"
 rustc-hash = "1.1.0"
 rand = "0.8.5"
+
+[dev-dependencies]
+criterion = "0.3.5"
+test-case = "1.2.0"

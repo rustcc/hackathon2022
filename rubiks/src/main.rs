@@ -5,6 +5,8 @@ use bevy::prelude::*;
 use bevy::window::WindowId;
 use bevy::winit::WinitWindows;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
+use bevy_rubikscube::core::flatten;
+use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle, SolvePuzzle};
 use bevy_rubikscube::core::{flatten, MyRaycastSet};
 use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle, PlayMode, TimekeepingTimer};
 use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
@@ -49,6 +51,7 @@ fn dashboard_ui(
     mut egui_context: ResMut<EguiContext>,
     mut create_ev: EventWriter<CreateCube>,
     mut rand_ev: EventWriter<RandomPuzzle>,
+    mut solve_ev: EventWriter<SolvePuzzle>,
     mut cube_settings: ResMut<CubeSettings>,
     mut move_seq: ResMut<MoveSequence>,
     mut timekeeping_timer: ResMut<TimekeepingTimer>,
@@ -77,6 +80,7 @@ fn dashboard_ui(
                 for l in [
                     ["U", "L", "F", "R", "B", "D"],
                     ["U'", "L'", "F'", "R'", "B'", "D'"],
+                    ["U2", "L2", "F2", "R2", "B2", "D2"],
                 ] {
                     for c in l {
                         if ui.button(c).clicked() {

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_mod_picking::{PickableBundle, PickingEvent, PickingCameraBundle, DefaultPickingPlugins, DebugCursorPickingPlugin, DebugEventsPickingPlugin};
 use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
 use rubiks_solver::prelude::ORDERED_FACES;
-use rubiks_solver::{rand_moves, Cube, Face, FaceletCube, Move, MoveVariant};
+use rubiks_solver::{rand_moves, solve, Cube, Face, FaceletCube, Move, MoveVariant};
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
 use std::time::Instant;
@@ -17,6 +17,7 @@ impl Plugin for ViewerPlugin {
         app.add_event::<CreateCube>()
             .add_event::<UpdateSurface>()
             .add_event::<RandomPuzzle>()
+            .add_event::<SolvePuzzle>()
             .init_resource::<CubeSettings>()
             .init_resource::<MoveSequence>()
             .init_resource::<ExecutingCommand>()
@@ -27,6 +28,7 @@ impl Plugin for ViewerPlugin {
             .add_system(create_cube_event)
             .add_system(move_piece)
             .add_system(random_puzzle)
+            .add_system(solve_puzzle)
             .add_system(mouse_dragging)
             .add_system_to_stage(CoreStage::PostUpdate, update_surface);
     }
@@ -114,6 +116,9 @@ impl CreateCube {
 
 /// 随机打乱魔方
 pub struct RandomPuzzle;
+
+/// 求解魔方
+pub struct SolvePuzzle;
 
 /// 更新索引
 pub struct UpdateSurface;
@@ -286,16 +291,17 @@ fn move_piece(
     mut executing_cmd: ResMut<ExecutingCommand>,
     mut q_pieces: Query<(&mut Transform, &Piece)>,
     mut update_ev: EventWriter<UpdateSurface>,
-    cube_settings: ResMut<CubeSettings>,
+    mut cube_settings: ResMut<CubeSettings>,
     time: Res<Time>,
 ) {
     if executing_cmd.left_angle == 0.0 {
         update_ev.send(UpdateSurface);
         // 读取下一个指令
         if let Some(command) = move_seq.pop_front() {
+            info!("执行指令: {:?}", command);
             executing_cmd.command = command;
             executing_cmd.left_angle = command.angle();
-            cube_settings.cube.apply_move(command);
+            cube_settings.cube = cube_settings.cube.apply_move(command);
         }
     } else {
         let clockwise = executing_cmd.command.clockwise();
@@ -513,6 +519,24 @@ fn generate_command(piece_translation: Vec3, start_pos: Vec3, end_pos: Vec3) -> 
                 return Command(BaseMove::M, rotate);
             } else {
                 return Command(BaseMove::R, rotate);
+            }
+        }
+    }
+}
+fn solve_puzzle(
+    mut ev: EventReader<SolvePuzzle>,
+    cube_setting: Res<CubeSettings>,
+    mut move_seq: ResMut<MoveSequence>,
+) {
+    for _ in ev.iter() {
+        info!("current cube {:?}", cube_setting.cube.state());
+        let solution = solve(&cube_setting.cube);
+        if let Some(s) = solution {
+            if cube_setting.cube.apply_moves(&s).is_solved() {
+                println!("solved");
+                for command in s {
+                    move_seq.push_back(command);
+                }
             }
         }
     }
