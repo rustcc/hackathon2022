@@ -29,7 +29,7 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
             init: Box::new(|| {
                 let root = init();
                 init_children(&root);
-                View::Node(root)
+                View::node(root)
             }),
             render: Box::new(|node| {
                 let root = node.expect("根节点");
@@ -62,7 +62,7 @@ pub fn Element<N: GenericNode>(cx: Scope) -> Element<N> {
 impl<N: GenericNode> Element<N> {
     /// 设定此组件的根节点。
     pub fn root<E: GenericElement<N>>(self, render: impl 'static + FnOnce(E) -> E) -> Self {
-        self.root_with::<E>(move |el| View::Node(render(el).into_node()))
+        self.root_with::<E>(move |el| View::node(render(el).into_node()))
     }
 
     /// 使用自定的函数渲染此组件的根节点。

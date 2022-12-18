@@ -1,7 +1,9 @@
 use crate::{
     template::{RenderOutput, Template},
-    GenericComponent, GenericNode, Scope, View,
+    GenericComponent, GenericElement, GenericNode, Scope, View,
 };
+
+define_placeholder!(Placeholder("placeholder for an empty `akun::Fragment`"));
 
 type Views<N> = Vec<View<N>>;
 
@@ -15,17 +17,31 @@ impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
     fn build_template(self) -> Template<N> {
         let Self { init, render } = self;
         Template {
-            init: Box::new(|| {
+            init: Box::new(move || {
                 let mut views = Views::default();
                 init(&mut views);
-                View::from(views)
+                if views.is_empty() {
+                    // 空片段用占位符替代
+                    View::node(N::create(Placeholder::<N>::TYPE))
+                } else {
+                    View::fragment(views)
+                }
             }),
-            render: Box::new(|node| {
+            render: Box::new(move |node| {
                 let mut views = Views::default();
                 let next = render(node, &mut views);
-                RenderOutput {
-                    next,
-                    view: View::from(views),
+                if views.is_empty() {
+                    // 跳过占位符
+                    let placeholder = next.expect("占位符");
+                    RenderOutput {
+                        next: placeholder.next_sibling(),
+                        view: View::node(placeholder),
+                    }
+                } else {
+                    RenderOutput {
+                        next,
+                        view: View::fragment(views),
+                    }
                 }
             }),
         }

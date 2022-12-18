@@ -6,15 +6,18 @@ type ViewDyn<N> = Rc<dyn Fn() -> View<N>>;
 /// 细粒度更新视图的核心机制。每个组件通过 [`View`] 与其父组件同步视图，以保证父
 /// 组件可将其视为一个整体来执行动态更新。
 #[derive(Clone)]
-pub enum View<N> {
+pub struct View<N>(ViewType<N>);
+
+#[derive(Clone)]
+enum ViewType<N> {
     Node(N),
     Fragment(Rc<[View<N>]>),
     Dyn(ViewDyn<N>),
 }
 
-impl<N> From<Vec<View<N>>> for View<N> {
-    fn from(t: Vec<View<N>>) -> Self {
-        Self::Fragment(t.into_boxed_slice().into())
+impl<N> ViewType<N> {
+    fn fragment(views: Vec<View<N>>) -> Self {
+        Self::Fragment(views.into_boxed_slice().into())
     }
 }
 
@@ -23,7 +26,7 @@ where
     F: 'static + Fn() -> View<N>,
 {
     fn from(f: F) -> Self {
-        Self::Dyn(Rc::new(f))
+        Self(ViewType::Dyn(Rc::new(f)))
     }
 }
 
@@ -34,50 +37,73 @@ impl<N: Clone> From<Signal<View<N>>> for View<N> {
 }
 
 impl<N: GenericNode> View<N> {
-    /// 对所有的 [`View::Node`] 节点执行 `GenericNo::deep_clone`，对于
-    /// [`View::Dyn`] 则拷贝其引用。
-    pub fn deep_clone(&self) -> View<N> {
-        match self {
-            Self::Node(t) => Self::Node(t.deep_clone()),
-            Self::Fragment(t) => t.iter().map(|t| t.deep_clone()).collect::<Vec<_>>().into(),
-            Self::Dyn(t) => Self::Dyn(t.clone()),
-        }
+    /// 创建一个节点视图。
+    pub fn node(node: N) -> Self {
+        Self(ViewType::Node(node))
     }
 
-    /// 遍历全部节点，[`View::Dyn`] 将会被立即执行。
+    /// 创建一个片段视图。
+    ///
+    /// # Panic
+    ///
+    /// 当给定 `views` 为空时，引发 `panic`。
+    pub fn fragment(views: Vec<View<N>>) -> Self {
+        if views.is_empty() {
+            panic!("`View` 不允许为空")
+        }
+        Self(ViewType::fragment(views))
+    }
+
+    /// 对所有的节点执行 [`deep_clone`]，动态视图则拷贝其引用。
+    ///
+    /// [`deep_clone`]: [`GenericNode::deep_clone`]
+    pub fn deep_clone(&self) -> View<N> {
+        Self(match &self.0 {
+            ViewType::Node(t) => ViewType::Node(t.deep_clone()),
+            ViewType::Fragment(t) => {
+                ViewType::fragment(t.iter().map(|t| t.deep_clone()).collect::<Vec<_>>())
+            }
+            ViewType::Dyn(t) => ViewType::Dyn(t.clone()),
+        })
+    }
+
+    /// 遍历全部节点，动态视图将会被立即执行。
     pub fn visit(&self, mut f: impl FnMut(&N)) {
         self.visit_impl(&mut f);
     }
 
     /// 使用 `&mut impl ...` 防止递归调用时 `f` 的类型无限嵌套。
     fn visit_impl(&self, f: &mut impl FnMut(&N)) {
-        match self {
-            Self::Node(t) => f(t),
-            Self::Fragment(t) => t.iter().for_each(|t| t.visit_impl(f)),
-            Self::Dyn(t) => t().visit_impl(f),
+        match &self.0 {
+            ViewType::Node(t) => f(t),
+            ViewType::Fragment(t) => t.iter().for_each(|t| t.visit_impl(f)),
+            ViewType::Dyn(t) => t().visit_impl(f),
         }
     }
 
-    /// [`visit`] 全部节点并逐个附加至 `parent`。
-    ///
-    /// [`visit`]: Self::visit
+    /// 将全部节点并逐个附加至 `parent`，动态试图会被立即执行。
     pub fn append_to(&self, parent: &N) {
         self.visit(|t| parent.append_child(t));
     }
 
-    pub fn first(&self) -> Option<N> {
+    pub fn first(&self) -> N {
         let mut current = self.clone();
         loop {
-            match current {
-                Self::Node(t) => return Some(t),
-                Self::Fragment(t) => {
-                    if let Some(first) = t.first() {
-                        current = first.clone();
-                    } else {
-                        return None;
-                    }
-                }
-                Self::Dyn(t) => current = t(),
+            match current.0 {
+                ViewType::Node(t) => return t,
+                ViewType::Fragment(t) => current = t.first().unwrap().clone(),
+                ViewType::Dyn(t) => current = t(),
+            }
+        }
+    }
+
+    pub fn last(&self) -> N {
+        let mut current = self.clone();
+        loop {
+            match current.0 {
+                ViewType::Node(t) => return t,
+                ViewType::Fragment(t) => current = t.last().unwrap().clone(),
+                ViewType::Dyn(t) => current = t(),
             }
         }
     }

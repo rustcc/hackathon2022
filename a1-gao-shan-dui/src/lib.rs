@@ -1,5 +1,7 @@
 #![allow(clippy::type_complexity)]
 
+#[macro_use]
+mod utils;
 mod component;
 mod element;
 mod node;
