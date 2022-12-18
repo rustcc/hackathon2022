@@ -298,10 +298,11 @@ fn move_piece(
         update_ev.send(UpdateSurface);
         // 读取下一个指令
         if let Some(command) = move_seq.pop_front() {
-            info!("执行指令: {:?}", command);
             executing_cmd.command = command;
             executing_cmd.left_angle = command.angle();
             cube_settings.cube = cube_settings.cube.apply_move(command);
+
+            info!("执行指令: {} {}", command, command.angle().to_degrees());
         }
     } else {
         let clockwise = executing_cmd.command.clockwise();
@@ -316,11 +317,13 @@ fn move_piece(
             if new_left_angle < 0.0 {
                 angle = left_angle;
                 new_left_angle = 0.0;
+                update_ev.send(UpdateSurface);
             }
         } else {
             if new_left_angle > 0.0 {
                 angle = left_angle;
                 new_left_angle = 0.0;
+                update_ev.send(UpdateSurface);
             }
         }
 
@@ -342,7 +345,7 @@ fn random_puzzle(
     cube_setting: Res<CubeSettings>,
 ) {
     for _ in ev.iter() {
-        let cmds = rand_moves(cube_setting.cube.size(), 20);
+        let cmds = rand_moves(cube_setting.cube.size(), 10);
         for command in cmds {
             cmd_ev.push_back(command);
         }

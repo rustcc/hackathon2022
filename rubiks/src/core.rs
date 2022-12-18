@@ -25,7 +25,11 @@ impl Piece {
     /// 判断是不是需要旋转的块
     pub fn is_selected(&self, command: &Move) -> bool {
         match command {
-            Move::U(_) => self.y == self.size - 1,
+            Move::U(_) => {
+                println!("{:?}", self.y);
+
+                self.y == self.size - 1
+            }
             Move::L(_) => self.x == 0,
             Move::F(_) => self.z == self.size - 1,
             Move::R(_) => self.x == self.size - 1,

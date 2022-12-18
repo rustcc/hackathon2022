@@ -38,7 +38,7 @@ fn main() {
     .add_startup_system(set_window_icon)
     .add_system(dashboard_ui);
 
-    #[cfg(feature = "debug")]
+    #[cfg(feature = "dev")]
     {
         app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
     }

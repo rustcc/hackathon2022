@@ -1,4 +1,5 @@
 use std::f32::consts::{FRAC_PI_2, PI};
+use std::fmt::{Display, Formatter};
 use std::hash::Hash;
 
 use derive_more::Display;
@@ -151,7 +152,7 @@ pub trait Cube: Clone + Eq + Hash + PartialEq {
 
 /// 用[WCA表示法]表示贴纸的方向
 ///
-/// [WCA表示法]: worldcubeassociation.org/regulations/#article-12-notation
+/// [WCA表示法]: https://worldcubeassociation.org/regulations/#article-12-notation
 #[derive(Clone, Copy, Debug, Display, Eq, Hash, PartialEq)]
 pub enum Face {
     /// 上面
@@ -195,7 +196,7 @@ pub fn sticker_index(size: CubeSize, face: Face, index: CubeSize) -> CubeSize {
 /// 每个移动方法都有一个移动变量控制移动的方向
 /// .
 ///
-/// [WCA表示法]: worldcubeassociation.org/regulations/#article-12-notation
+/// [WCA表示法]: https://worldcubeassociation.org/regulations/#article-12-notation
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Move {
     /// 转动顶层
@@ -228,6 +229,12 @@ pub enum Move {
     Y(MoveVariant),
     /// 沿z轴转动整个魔方
     Z(MoveVariant),
+}
+
+impl Display for Move {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}", self.get_move_name(), self.get_variant())
+    }
 }
 
 impl Move {
@@ -310,6 +317,26 @@ impl Move {
         }
     }
 
+    fn get_move_name(&self) -> String {
+        match self {
+            Move::U(_) => "U".to_string(),
+            Move::L(_) => "L".to_string(),
+            Move::F(_) => "F".to_string(),
+            Move::R(_) => "R".to_string(),
+            Move::B(_) => "B".to_string(),
+            Move::D(_) => "D".to_string(),
+            Move::Uw(n, _) => format!("{n}Uw"),
+            Move::Lw(n, _) => format!("{n}Lw"),
+            Move::Fw(n, _) => format!("{n}Fw"),
+            Move::Rw(n, _) => format!("{n}Rw"),
+            Move::Bw(n, _) => format!("{n}Bw"),
+            Move::Dw(n, _) => format!("{n}Dw"),
+            Move::X(_) => "X".to_string(),
+            Move::Y(_) => "Y".to_string(),
+            Move::Z(_) => "Z".to_string(),
+        }
+    }
+
     /// 反转
     pub fn prime(&self) -> Move {
         self.with_variant(self.get_variant().prime())
@@ -326,6 +353,17 @@ pub enum MoveVariant {
     Double,
     /// 90°逆时针转动
     Inverse,
+}
+
+impl Display for MoveVariant {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            MoveVariant::Standard => "",
+            MoveVariant::Double => "2",
+            MoveVariant::Inverse => "'",
+        };
+        write!(f, "{}", s)
+    }
 }
 
 impl MoveVariant {
