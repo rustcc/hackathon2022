@@ -8,6 +8,7 @@ use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_rubikscube::core::{flatten, MyRaycastSet};
 use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle, PlayMode, TimekeepingTimer};
 use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
+use rubiks_solver::Cube;
 use bevy_inspector_egui::prelude::*;
 use bevy_mod_picking::{PickableBundle, PickingCameraBundle, DefaultPickingPlugins, DebugCursorPickingPlugin, DebugEventsPickingPlugin};
 use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};

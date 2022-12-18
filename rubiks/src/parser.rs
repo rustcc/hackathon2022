@@ -1,10 +1,11 @@
-use crate::core::{BaseMove, Command, Elem};
+use crate::core::{BaseMove, Elem};
 use nom::branch::alt;
 use nom::character::complete::{char, one_of};
 use nom::combinator::{all_consuming, map};
 use nom::multi::{many0, many1, many_m_n};
 use nom::sequence::{delimited, pair};
 use nom::IResult;
+use rubiks_solver::{Move, MoveVariant};
 
 /// 通过字符串转换成旋转命令
 fn parse_move(i: &str) -> IResult<&str, BaseMove> {
@@ -49,13 +50,39 @@ fn parse_rep(i: &str) -> IResult<&str, i8> {
     })(i)
 }
 
+fn parse_var(i: &str) -> IResult<&str, MoveVariant> {
+    map(pair(parse_double, parse_prime), |(double, prime)| {
+        let mut rep = MoveVariant::Standard;
+        if double {
+            rep = MoveVariant::Double;
+        }
+        if prime {
+            rep = MoveVariant::Inverse;
+        }
+        rep
+    })(i)
+}
+
 /// 解析单个命令
-fn parse_command(i: &str) -> IResult<&str, Command> {
-    map(pair(parse_move, parse_rep), |(mv, rep)| Command(mv, rep))(i)
+fn parse_command(i: &str) -> IResult<&str, Move> {
+    map(pair(parse_move, parse_var), |(mv, rep)| match mv {
+        BaseMove::U => Move::U(rep),
+        BaseMove::L => Move::L(rep),
+        BaseMove::F => Move::F(rep),
+        BaseMove::R => Move::R(rep),
+        BaseMove::B => Move::B(rep),
+        BaseMove::D => Move::D(rep),
+        BaseMove::M => Move::Lw(3, rep),
+        BaseMove::E => Move::Uw(3, rep),
+        BaseMove::S => Move::Dw(3, rep),
+        BaseMove::X => Move::X(rep),
+        BaseMove::Y => Move::Y(rep),
+        BaseMove::Z => Move::Z(rep),
+    })(i)
 }
 
 /// 解析一组命令
-fn parse_group(i: &str) -> IResult<&str, (Vec<Command>, i8)> {
+fn parse_group(i: &str) -> IResult<&str, (Vec<Move>, i8)> {
     let p1 = char('(');
     let p2 = many1(parse_command);
     let p3 = char(')');
@@ -79,15 +106,15 @@ pub fn parse(i: &str) -> IResult<&str, Vec<Elem>> {
 
 #[test]
 fn test_parse() {
-    use crate::core::BaseMove::*;
     use crate::core::Elem::*;
-    assert_eq!(parse("").unwrap().1, vec![]);
-    assert_eq!(parse("R").unwrap().1, vec![One(Command(R, 1))]);
-    assert_eq!(parse("R2'").unwrap().1, vec![One(Command(R, -2))]);
+    use rubiks_solver::MoveVariant::*;
+    assert_eq!(parse("").unwrap().1, vec![One(Move::R(Standard))]);
+    assert_eq!(parse("R").unwrap().1, vec![One(Move::R(Standard))]);
+    assert_eq!(parse("R2'").unwrap().1, vec![One(Move::R(Double))]);
     assert!(parse("R'2").is_err());
     assert_eq!(
         parse("(RR')'").unwrap().1,
-        vec![Group(vec![Command(R, 1), Command(R, -1)], -1)]
+        vec![Group(vec![Move::R(Standard), Move::R(Inverse)], -1)]
     );
     assert!(parse("RUR'U'").is_ok());
     assert!(parse("R2D(R'U2R)D'(R'U2R')").is_ok());

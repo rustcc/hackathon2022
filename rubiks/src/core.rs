@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use rubiks_solver::Face;
+use rubiks_solver::{Face, Move};
 use std::f32::consts::{FRAC_PI_2, PI};
 use std::fmt::{Display, Formatter};
 
@@ -23,20 +23,23 @@ impl Piece {
     }
 
     /// 判断是不是需要旋转的块
-    pub fn is_selected(&self, command: &Command) -> bool {
-        match command.0 {
-            BaseMove::U => self.y == self.size - 1,
-            BaseMove::L => self.x == 0,
-            BaseMove::F => self.z == self.size - 1,
-            BaseMove::R => self.x == self.size - 1,
-            BaseMove::B => self.z == 0,
-            BaseMove::D => self.y == 0,
-            BaseMove::M => self.x == self.size / 2,
-            BaseMove::E => self.y == self.size / 2,
-            BaseMove::S => self.z == self.size / 2,
-            BaseMove::X => true,
-            BaseMove::Y => true,
-            BaseMove::Z => true,
+    pub fn is_selected(&self, command: &Move) -> bool {
+        match command {
+            Move::U(_) => self.y == self.size - 1,
+            Move::L(_) => self.x == 0,
+            Move::F(_) => self.z == self.size - 1,
+            Move::R(_) => self.x == self.size - 1,
+            Move::B(_) => self.z == 0,
+            Move::D(_) => self.y == 0,
+            Move::X(_) => true,
+            Move::Y(_) => true,
+            Move::Z(_) => true,
+            Move::Uw(n, _) => self.y == self.size - *n as u8,
+            Move::Lw(n, _) => self.x == *n as u8 - 1,
+            Move::Fw(n, _) => self.z == self.size - *n as u8,
+            Move::Rw(n, _) => self.x == self.size - *n as u8,
+            Move::Bw(n, _) => self.z == *n as u8 - 1,
+            Move::Dw(n, _) => self.y == *n as u8 - 1,
         }
     }
 
@@ -209,12 +212,12 @@ impl Display for Command {
 /// 是一条命令还是一组命令
 #[derive(Debug, PartialEq, Eq)]
 pub enum Elem {
-    One(Command),
-    Group(Vec<Command>, i8),
+    One(Move),
+    Group(Vec<Move>, i8),
 }
 
 /// 将旋转指令打平
-pub fn flatten(elems: Vec<Elem>) -> Vec<Command> {
+pub fn flatten(elems: Vec<Elem>) -> Vec<Move> {
     let mut v = vec![];
     for e in elems {
         match e {
@@ -246,8 +249,10 @@ pub struct MyRaycastSet;
 
 #[test]
 fn test_flatten() {
-    let e = Elem::Group(vec![Command(BaseMove::U, 1), Command(BaseMove::R, 1)], -1);
+    use rubiks_solver::MoveVariant::*;
+    let e = Elem::Group(vec![(Move::U(Standard)), Move::R(Standard)], -1);
     let f = flatten(vec![e]);
+    assert_eq!(f, vec![Move::R(Inverse), Move::U(Inverse)]);
     assert_eq!(f, vec![Command(BaseMove::R, -1), Command(BaseMove::U, -1)]);
 }
 

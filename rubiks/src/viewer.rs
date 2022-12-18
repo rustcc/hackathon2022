@@ -1,7 +1,10 @@
 use crate::core::{random_command, Command, Piece, Surface, BaseMove, MyRaycastSet};
+use crate::core::{Piece, Surface};
 use bevy::prelude::*;
 use bevy_mod_picking::{PickableBundle, PickingEvent, PickingCameraBundle, DefaultPickingPlugins, DebugCursorPickingPlugin, DebugEventsPickingPlugin};
 use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
+use rubiks_solver::prelude::ORDERED_FACES;
+use rubiks_solver::{rand_moves, Cube, Face, FaceletCube, Move, MoveVariant};
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
 use std::time::Instant;
@@ -30,12 +33,10 @@ impl Plugin for ViewerPlugin {
 }
 
 /// 魔方设置
-#[derive(Debug, Resource)]
+#[derive(Resource)]
 pub struct CubeSettings {
-    /// 是几阶的魔方
-    pub cube_size: i32,
-    /// 块的大小
-    pub piece_size: f32,
+    /// 魔方模型
+    pub cube: FaceletCube,
     /// 前面的颜色
     pub front_color: Color,
     /// 后面的颜色
@@ -57,8 +58,8 @@ pub struct CubeSettings {
 impl Default for CubeSettings {
     fn default() -> Self {
         Self {
-            cube_size: 3,
-            piece_size: 1.0,
+            cube: FaceletCube::new(3),
+
             front_color: Color::GREEN,
             back_color: Color::BLUE,
             left_color: Color::ORANGE,
@@ -78,7 +79,7 @@ pub struct MoveSequence(pub VecDeque<Command>);
 /// 正在执行的command
 #[derive(Resource)]
 pub struct ExecutingCommand {
-    pub command: Command,
+    pub command: Move,
     /// 剩余待旋转的弧度
     pub left_angle: f32,
 }
@@ -86,7 +87,7 @@ pub struct ExecutingCommand {
 impl Default for ExecutingCommand {
     fn default() -> Self {
         Self {
-            command: Command(BaseMove::U, 0),
+            command: Move::U(MoveVariant::Standard),
             left_angle: 0.0,
         }
     }
@@ -155,13 +156,11 @@ fn create_cube_event(
         for entity in q_old_cubes.iter() {
             commands.entity(entity).despawn_recursive();
         }
-        cube_settings.cube_size = ev.size;
-        let cube_size = cube_settings.cube_size as u8;
-        let size = cube_settings.piece_size;
-        let border = (cube_size as f32 * size) / 2.0 - 0.5;
 
-        let cube = GeoCube::new(ev.size);
-        info!("{:?}", cube.state());
+        let cube_size = ev.size as u8;
+
+        cube_settings.cube = FaceletCube::new(ev.size);
+        let border = (cube_size as f32) / 2.0 - 0.5;
 
         // 生成魔方
         for x in 0..cube_size {
@@ -170,7 +169,7 @@ fn create_cube_event(
                     let piece = Piece::new(cube_size, x, y, z);
                     commands
                         .spawn(PbrBundle {
-                            mesh: meshes.add(Mesh::from(shape::Cube { size })),
+                            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
                             material: materials.add(StandardMaterial {
                                 base_color: Color::BLACK,
                                 alpha_mode: AlphaMode::Blend,
@@ -217,9 +216,9 @@ fn spawn_sticker(
     cube_settings: &CubeSettings,
     face: Face,
 ) {
-    let size = cube_settings.piece_size;
+    let size = 1.0;
     // 贴纸颜色的大小， 比块小一点
-    let square_size = cube_settings.piece_size * 0.9;
+    let square_size = 0.9;
     let check = match face {
         Face::U => {
             // 上面
@@ -287,16 +286,16 @@ fn move_piece(
     mut executing_cmd: ResMut<ExecutingCommand>,
     mut q_pieces: Query<(&mut Transform, &Piece)>,
     mut update_ev: EventWriter<UpdateSurface>,
-    cube_settings: Res<CubeSettings>,
+    cube_settings: ResMut<CubeSettings>,
     time: Res<Time>,
 ) {
     if executing_cmd.left_angle == 0.0 {
         update_ev.send(UpdateSurface);
         // 读取下一个指令
         if let Some(command) = move_seq.pop_front() {
-            info!("command: {}", command);
             executing_cmd.command = command;
             executing_cmd.left_angle = command.angle();
+            cube_settings.cube.apply_move(command);
         }
     } else {
         let clockwise = executing_cmd.command.clockwise();
@@ -331,9 +330,13 @@ fn move_piece(
     }
 }
 
-fn random_puzzle(mut ev: EventReader<RandomPuzzle>, mut cmd_ev: ResMut<MoveSequence>) {
+fn random_puzzle(
+    mut ev: EventReader<RandomPuzzle>,
+    mut cmd_ev: ResMut<MoveSequence>,
+    cube_setting: Res<CubeSettings>,
+) {
     for _ in ev.iter() {
-        let cmds = random_command(10);
+        let cmds = rand_moves(cube_setting.cube.size(), 20);
         for command in cmds {
             cmd_ev.push_back(command);
         }
@@ -343,27 +346,17 @@ fn random_puzzle(mut ev: EventReader<RandomPuzzle>, mut cmd_ev: ResMut<MoveSeque
 /// 通过检查块的空间坐标，判断块的面
 fn update_surface(
     mut update_ev: EventReader<UpdateSurface>,
-    mut q_plane: Query<(&Transform, &mut Piece, &Children)>,
-    mut q_surface: Query<&mut Surface>,
+    mut q_plane: Query<(&Transform, &mut Piece)>,
     cube_settings: Res<CubeSettings>,
 ) {
     for _ in update_ev.iter() {
-        let order = cube_settings.cube_size;
-        let size = cube_settings.piece_size;
-        let border = (order as f32 * size) / 2.0 - 0.5;
-        for (transform, mut piece, children) in q_plane.iter_mut() {
+        let order = cube_settings.cube.size();
+        let border = (order as f32) / 2.0 - 0.5;
+
+        for (transform, mut piece) in q_plane.iter_mut() {
             piece.x = (transform.translation.x.round() + border) as u8;
             piece.y = (transform.translation.y.round() + border) as u8;
             piece.z = (transform.translation.z.round() + border) as u8;
-            for &child in children.iter() {
-                if let Ok(mut surface) = q_surface.get_mut(child) {
-                    for face in ORDERED_FACES {
-                        if piece.has_face(face) {
-                            surface.current = face;
-                        }
-                    }
-                }
-            }
         }
     }
 }

@@ -1,6 +1,8 @@
+use std::f32::consts::{FRAC_PI_2, PI};
 use std::hash::Hash;
 
 use derive_more::Display;
+use glam::Vec3;
 
 pub type CubeSize = i32;
 
@@ -250,6 +252,43 @@ impl Move {
         }
     }
 
+    /// 获取转动的角度(弧度)
+    pub fn angle(&self) -> f32 {
+        match self.get_variant() {
+            MoveVariant::Standard => FRAC_PI_2,
+            MoveVariant::Double => PI,
+            MoveVariant::Inverse => -FRAC_PI_2,
+        }
+    }
+
+    pub fn clockwise(&self) -> bool {
+        match self.get_variant() {
+            MoveVariant::Standard => true,
+            MoveVariant::Double => true,
+            MoveVariant::Inverse => false,
+        }
+    }
+
+    pub fn axis(&self) -> Vec3 {
+        match self {
+            Move::U(_) => Vec3::Y,
+            Move::L(_) => Vec3::X,
+            Move::F(_) => Vec3::Z,
+            Move::R(_) => Vec3::X,
+            Move::B(_) => Vec3::Z,
+            Move::D(_) => Vec3::Y,
+            Move::X(_) => Vec3::X,
+            Move::Y(_) => Vec3::Y,
+            Move::Z(_) => Vec3::Z,
+            Move::Uw(_, _) => Vec3::Y,
+            Move::Lw(_, _) => Vec3::X,
+            Move::Fw(_, _) => Vec3::Z,
+            Move::Rw(_, _) => Vec3::X,
+            Move::Bw(_, _) => Vec3::Z,
+            Move::Dw(_, _) => Vec3::Y,
+        }
+    }
+
     /// 用给定转动变量产生新的转动
     pub fn with_variant(&self, variant: MoveVariant) -> Move {
         match self {
@@ -270,6 +309,11 @@ impl Move {
             Move::Z(_) => Move::Z(variant),
         }
     }
+
+    /// 反转
+    pub fn prime(&self) -> Move {
+        self.with_variant(self.get_variant().prime())
+    }
 }
 
 /// 控制转动的变量
@@ -282,6 +326,16 @@ pub enum MoveVariant {
     Double,
     /// 90°逆时针转动
     Inverse,
+}
+
+impl MoveVariant {
+    pub fn prime(&self) -> MoveVariant {
+        match self {
+            MoveVariant::Standard => MoveVariant::Inverse,
+            MoveVariant::Double => MoveVariant::Double,
+            MoveVariant::Inverse => MoveVariant::Standard,
+        }
+    }
 }
 
 /// 获取给定大小的魔方的求解状态
@@ -311,6 +365,29 @@ pub fn all_moves(size: CubeSize) -> Vec<Move> {
                 moveset.push(mv(slice, variant));
             }
         }
+    }
+
+    moveset
+}
+
+/// 产生随机的转动步骤
+pub fn rand_moves(_size: CubeSize, max_step: usize) -> Vec<Move> {
+    use rand::prelude::*;
+    use Move::*;
+    use MoveVariant::*;
+    let mut rng = thread_rng();
+
+    let mut moveset = Vec::new();
+
+    let m_list = [U, R, F, L, D, B];
+    let v_list = [Standard, Double, Inverse];
+    for _ in 0..max_step {
+        let m = rng.gen_range(0..6);
+        let v = rng.gen_range(0..3);
+        let mv = m_list[m];
+        let variant = v_list[v];
+
+        moveset.push(mv(variant));
     }
 
     moveset
