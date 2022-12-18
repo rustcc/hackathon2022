@@ -13,17 +13,12 @@ use bevy_mod_picking::{
 use bevy_mod_raycast::{
     DefaultRaycastingPlugin, Intersection, RaycastMesh, RaycastMethod, RaycastSource, RaycastSystem,
 };
-use bevy_rubikscube::core::flatten;
 use bevy_rubikscube::core::{flatten, MyRaycastSet};
-use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle};
-use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle, SolvePuzzle};
-use bevy_rubikscube::core::{flatten, MyRaycastSet};
-use bevy_rubikscube::viewer::{CreateCube, CubeSettings, MoveSequence, RandomPuzzle, PlayMode, TimekeepingTimer};
+use bevy_rubikscube::viewer::{
+    CreateCube, CubeSettings, MoveSequence, PlayMode, RandomPuzzle, SolvePuzzle, TimekeepingTimer,
+};
 use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
 use rubiks_solver::Cube;
-use bevy_inspector_egui::prelude::*;
-use bevy_mod_picking::{PickableBundle, PickingCameraBundle, DefaultPickingPlugins, DebugCursorPickingPlugin, DebugEventsPickingPlugin};
-use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
 use std::io::Cursor;
 use std::time::Instant;
 use winit::window::Icon;
@@ -109,30 +104,48 @@ fn dashboard_ui(
             .spacing([10.0, 20.0])
             .striped(true)
             .show(ui, |ui| {
-
                 ui.add(egui::Label::new("Rotate Speed"));
-                ui.add(egui::Slider::new(&mut cube_settings.rotate_speed, 0.1..=10.0));
+                ui.add(egui::Slider::new(
+                    &mut cube_settings.rotate_speed,
+                    0.1..=10.0,
+                ));
                 ui.end_row();
 
                 ui.add(egui::Label::new("Play Mode"));
                 ui.horizontal(|ui| {
-                    ui.selectable_value(&mut cube_settings.play_mode, PlayMode::Practice, "Practice");
-                    if ui.selectable_value(&mut cube_settings.play_mode, PlayMode::Timekeeping, "Timekeeping").clicked() {
+                    ui.selectable_value(
+                        &mut cube_settings.play_mode,
+                        PlayMode::Practice,
+                        "Practice",
+                    );
+                    if ui
+                        .selectable_value(
+                            &mut cube_settings.play_mode,
+                            PlayMode::Timekeeping,
+                            "Timekeeping",
+                        )
+                        .clicked()
+                    {
                         // 重置计时器
                         timekeeping_timer.0 = Instant::now();
                     }
                 });
                 if cube_settings.play_mode == PlayMode::Timekeeping {
-                    ui.add(egui::Label::new(format!("{}s", timekeeping_timer.0.elapsed().as_secs())));
+                    ui.add(egui::Label::new(format!(
+                        "{}s",
+                        timekeeping_timer.0.elapsed().as_secs()
+                    )));
                 }
                 ui.end_row();
 
-                if ui.add_sized([100.0, 30.0], egui::Button::new("Scramble")).clicked() {
+                if ui
+                    .add_sized([100.0, 30.0], egui::Button::new("Scramble"))
+                    .clicked()
+                {
                     rand_ev.send(RandomPuzzle);
                 }
                 ui.end_row();
             });
-
     });
 }
 

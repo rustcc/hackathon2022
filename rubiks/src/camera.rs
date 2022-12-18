@@ -1,32 +1,33 @@
 use crate::core::MyRaycastSet;
-use bevy::prelude::*;
 use bevy::app::{App, Plugin};
 use bevy::math::Vec3;
+use bevy::prelude::*;
 use bevy::prelude::{Camera3dBundle, Commands, Transform};
 use bevy_mod_picking::PickingCameraBundle;
-use bevy_mod_raycast::{RaycastSource, RaycastMethod, RaycastSystem, Intersection};
+use bevy_mod_raycast::{Intersection, RaycastMethod, RaycastSource, RaycastSystem};
 
 /// 相机插件
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_startup_system(setup)
-        // .add_system(intersection)
-        .add_system_to_stage(
-            CoreStage::First,
-            update_raycast_with_cursor.before(RaycastSystem::BuildRays::<MyRaycastSet>),
-        );
+        app.add_startup_system(setup)
+            // .add_system(intersection)
+            .add_system_to_stage(
+                CoreStage::First,
+                update_raycast_with_cursor.before(RaycastSystem::BuildRays::<MyRaycastSet>),
+            );
     }
 }
 
 fn setup(mut commands: Commands) {
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(5.5, 5.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..Default::default()
-    }).insert(PickingCameraBundle::default())
-    .insert(RaycastSource::<MyRaycastSet>::new());
+    commands
+        .spawn(Camera3dBundle {
+            transform: Transform::from_xyz(5.5, 5.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ..Default::default()
+        })
+        .insert(PickingCameraBundle::default())
+        .insert(RaycastSource::<MyRaycastSet>::new());
 }
 
 fn update_raycast_with_cursor(

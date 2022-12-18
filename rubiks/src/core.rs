@@ -259,18 +259,3 @@ fn test_flatten() {
     assert_eq!(f, vec![Move::R(Inverse), Move::U(Inverse)]);
     assert_eq!(f, vec![Command(BaseMove::R, -1), Command(BaseMove::U, -1)]);
 }
-
-pub fn random_command(n: usize) -> Vec<Command> {
-    use rand::prelude::*;
-    let mut rng = thread_rng();
-    let mut v = vec![];
-    for _ in 0..n {
-        let mov: usize = rng.gen();
-        let mov = MOVE_LIST[mov % 9];  // 暂时不让整个魔方旋转
-        let ran: i64 = rng.gen();
-        let rep = ran % 2 + 1;
-        let rep = if ran % 2 == 0 { rep } else { -rep };
-        v.push(Command(mov, rep as i8));
-    }
-    v
-}
