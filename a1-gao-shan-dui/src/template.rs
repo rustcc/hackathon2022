@@ -16,9 +16,14 @@ pub struct Template<N> {
     /// 初始化阶段执行，返回需要被模板记录的 [`View`]，且每次调用返回的 [`View`]
     /// 结构保持一致。
     pub init: Box<dyn FnOnce() -> View<N>>,
-    /// 渲染阶段执行，接受与初始化阶段相同结构的 [`View`] 作为参数，并返回一个与
-    /// 实际呈现的节点树同步的 [`View`]。
-    pub render: Box<dyn FnOnce(View<N>) -> View<N>>,
+    /// 渲染阶段执行，接受初始化后的首个节点，返回渲染后的 [`View`] 及其之后的
+    /// 第一个兄弟节点。
+    pub render: Box<dyn FnOnce(Option<N>) -> RenderOutput<N>>,
+}
+
+pub struct RenderOutput<N> {
+    pub next: Option<N>,
+    pub view: View<N>,
 }
 
 /// 储存了全部有 [`TemplateId`] 且被初始化的模板。
@@ -85,13 +90,13 @@ impl TemplateId {
 }
 
 pub(crate) struct TemplateContent<N> {
-    pub view: View<N>,
+    pub container: N,
 }
 
 impl<N: GenericNode> TemplateContent<N> {
     pub fn deep_clone(&self) -> Self {
         Self {
-            view: self.view.deep_clone(),
+            container: self.container.deep_clone(),
         }
     }
 }

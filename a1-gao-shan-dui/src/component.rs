@@ -1,10 +1,10 @@
 use crate::{
-    template::{GlobalTemplates, Template, TemplateContent, TemplateId},
-    GenericNode, NodeType, View,
+    template::{GlobalTemplates, RenderOutput, Template, TemplateContent, TemplateId},
+    untrack, GenericNode, NodeType, View,
 };
 
 /// 构建视图的核心机制，每个组件可以被构建成一个 [`Template`]。
-pub trait GenericComponent<N: GenericNode>: Sized {
+pub trait GenericComponent<N: GenericNode>: 'static + Sized {
     fn build_template(self) -> Template<N>;
 
     /// 用于标识该组件的唯一 ID，每次调用都应该保持一致。
@@ -25,9 +25,9 @@ pub trait GenericComponent<N: GenericNode>: Sized {
         self.into_dyn_component().render()
     }
 
-    /// 初始化模板，并在渲染阶段执行前将其附加到 `parent` 上。
-    fn render_to(self, parent: &N) -> View<N> {
-        self.into_dyn_component().render_to(parent)
+    /// 初始化模板并将渲染的视图附加到 `parent`。
+    fn render_to(self, parent: &N) {
+        untrack(|| self.into_dyn_component().render_to(parent));
     }
 }
 
@@ -46,32 +46,16 @@ impl<N: GenericNode> GenericComponent<N> for DynComponent<N> {
     }
 
     fn render(self) -> View<N> {
-        self.render_impl(|_| {})
-    }
-
-    fn render_to(self, parent: &N) -> View<N> {
-        self.render_impl(|view| view.append_to(parent))
-    }
-}
-
-impl<N: GenericNode> DynComponent<N> {
-    /// 读取当前组件的 ID，调用 [`GenericComponent::id`] 会返回空值。
-    pub fn id(&self) -> Option<TemplateId> {
-        self.id
-    }
-
-    fn render_impl(self, after_init: impl FnOnce(&View<N>)) -> View<N> {
         let Self {
             id,
             template: Template { init, render },
         } = self;
         // 1) 初始化阶段
-        let TemplateContent { view } = {
+        let TemplateContent { container } = {
             let init_template = move || {
                 let container = N::create(NodeType::Template(id.map(|id| id.data()).unwrap_or("")));
-                let view = init();
-                view.append_to(&container);
-                TemplateContent { view }
+                init().append_to(&container);
+                TemplateContent { container }
             };
             if let Some(id) = id {
                 // 拷贝或者初始化模板。
@@ -81,8 +65,21 @@ impl<N: GenericNode> DynComponent<N> {
                 init_template()
             }
         };
-        after_init(&view);
         // 2) 渲染阶段
-        render(view)
+        let RenderOutput { view, next } = render(container.first_child());
+        // next 应该指向最后一个子结点的下一个节点，即 None
+        debug_assert!(next.is_none());
+        view
+    }
+
+    fn render_to(self, parent: &N) {
+        self.render().append_to(parent);
+    }
+}
+
+impl<N: GenericNode> DynComponent<N> {
+    /// 读取当前组件的 ID，调用 [`GenericComponent::id`] 会返回空值。
+    pub fn id(&self) -> Option<TemplateId> {
+        self.id
     }
 }

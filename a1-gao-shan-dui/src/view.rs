@@ -35,7 +35,7 @@ impl<N: Clone> From<Signal<View<N>>> for View<N> {
 
 impl<N: GenericNode> View<N> {
     /// 对所有的 [`View::Node`] 节点执行 `GenericNo::deep_clone`，对于
-    /// [`View::dyn`] 则拷贝其引用。
+    /// [`View::Dyn`] 则拷贝其引用。
     pub fn deep_clone(&self) -> View<N> {
         match self {
             Self::Node(t) => Self::Node(t.deep_clone()),
@@ -44,7 +44,7 @@ impl<N: GenericNode> View<N> {
         }
     }
 
-    /// 遍历全部节点，[`View::dyn`] 将会被立即执行。
+    /// 遍历全部节点，[`View::Dyn`] 将会被立即执行。
     pub fn visit(&self, mut f: impl FnMut(&N)) {
         self.visit_impl(&mut f);
     }
@@ -59,7 +59,26 @@ impl<N: GenericNode> View<N> {
     }
 
     /// [`visit`] 全部节点并逐个附加至 `parent`。
+    ///
+    /// [`visit`]: Self::visit
     pub fn append_to(&self, parent: &N) {
         self.visit(|t| parent.append_child(t));
+    }
+
+    pub fn first(&self) -> Option<N> {
+        let mut current = self.clone();
+        loop {
+            match current {
+                Self::Node(t) => return Some(t),
+                Self::Fragment(t) => {
+                    if let Some(first) = t.first() {
+                        current = first.clone();
+                    } else {
+                        return None;
+                    }
+                }
+                Self::Dyn(t) => current = t(),
+            }
+        }
     }
 }
