@@ -17,7 +17,7 @@ macro_rules! __view_internal {
         $crate::__private::view_element(
             $cx,
             $path,
-            |element| { element $($props)* }
+            move |element| { element $($props)* }
         )
         $($children)*
     };
@@ -264,13 +264,19 @@ macro_rules! __view_internal {
 #[macro_export]
 macro_rules! view {
     ($cx:expr, $($args:tt)*) => {{
-        let cx = $cx;
+        thread_local! {
+            static __ID: $crate::template::TemplateId =
+                $crate::template::TemplateId::generate(concat!(module_path!(), ":", line!()));
+        }
+
+        let __cx = $cx;
+        let __id = __ID.with(Clone::clone);
         $crate::__view_internal! {
-            cx=[cx]
+            cx=[__cx]
             prefix=[*]
             path=[$crate::__private::ViewRoot]
             children=[]
-            props=[]
+            props=[.id(__id)]
             rest=[$($args)*]
         }
     }};

@@ -1,6 +1,7 @@
 use crate::{
-    elements::IntoReactive, DynComponent, Element, GenericComponent, GenericElement, GenericNode,
-    Scope,
+    elements::IntoReactive,
+    template::{Template, TemplateId},
+    DynComponent, Element, GenericComponent, GenericElement, GenericNode, Scope,
 };
 
 pub fn view_element<N, E>(
@@ -24,17 +25,45 @@ where
 }
 
 pub struct ViewRoot<N> {
+    id: Option<TemplateId>,
     children: Option<DynComponent<N>>,
 }
 
 #[allow(non_snake_case)]
 pub fn ViewRoot<N: GenericNode>(_: Scope) -> ViewRoot<N> {
-    ViewRoot { children: None }
+    ViewRoot {
+        id: None,
+        children: None,
+    }
+}
+
+impl<N: GenericNode> GenericComponent<N> for ViewRoot<N> {
+    fn build_template(self) -> Template<N> {
+        if self.id.is_none() {
+            panic!("未指定 `view!` 的 ID");
+        }
+        let template = self
+            .children
+            .expect("未指定 `view!` 的根组件")
+            .build_template();
+        Template {
+            id: self.id,
+            ..template
+        }
+    }
 }
 
 impl<N: GenericNode> ViewRoot<N> {
-    pub fn build(self) -> DynComponent<N> {
-        self.children.expect("未指定 `view!` 的根组件")
+    pub fn build(self) -> Self {
+        self
+    }
+
+    pub fn id(mut self, id: TemplateId) -> Self {
+        if self.id.is_some() {
+            panic!("`view!` 有且只能有一个 ID")
+        }
+        self.id = Some(id);
+        self
     }
 
     pub fn child<C: GenericComponent<N>>(mut self, child: C) -> Self {
