@@ -17,6 +17,7 @@ impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
     fn build_template(self) -> Template<N> {
         let Self { init, render } = self;
         Template {
+            id: None,
             init: Box::new(move || {
                 let mut views = Views::default();
                 init(&mut views);
@@ -64,7 +65,7 @@ impl<N: GenericNode> Fragment<N> {
 
     /// 向此片段中添加一个组件。
     pub fn child<C: GenericComponent<N>>(mut self, child: C) -> Self {
-        let Template { init, render } = child.build_template();
+        let Template { init, render, .. } = child.build_template();
         self.init = Box::new(move |views| {
             (self.init)(views);
             views.push(init());

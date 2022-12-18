@@ -13,6 +13,8 @@ thread_local! {
 /// 始化节点树，它返回的 [`View`] 不应该包含任何动态内容；[`Template::render`]
 /// 在初始化过的节点树上执行渲染工作，它可以返回任意 [`View`]。
 pub struct Template<N> {
+    /// 用于标识该模板的唯一 ID。
+    pub id: Option<TemplateId>,
     /// 初始化阶段执行，返回需要被模板记录的 [`View`]，且每次调用返回的 [`View`]
     /// 结构保持一致。
     pub init: Box<dyn FnOnce() -> View<N>>,
@@ -65,6 +67,7 @@ impl<N: GenericNode> GlobalTemplates<N> {
     }
 }
 
+/// 用于标识模板的唯一 ID。
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub struct TemplateId {
     data: &'static str,

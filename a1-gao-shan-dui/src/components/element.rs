@@ -26,6 +26,7 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
         } = self;
         let (init, render) = init_and_render_root.expect("根节点尚未设定");
         Template {
+            id: None,
             init: Box::new(|| {
                 let root = init();
                 init_children(&root);
@@ -86,7 +87,7 @@ impl<N: GenericNode> Element<N> {
 
     /// 添加一个子结点。
     pub fn child<C: GenericComponent<N>>(mut self, child: C) -> Self {
-        let Template { init, render } = child.build_template();
+        let Template { init, render, .. } = child.build_template();
         self.init_children = Box::new(move |root| {
             (self.init_children)(root);
             init().append_to(root);
