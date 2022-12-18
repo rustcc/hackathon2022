@@ -1,5 +1,8 @@
 use crate::{GenericNode, NodeType, Scope};
 
+/// 某个节点类型所对应的元素，此接口主要用来创建 [`Element`] 组件。
+///
+/// [`Element`]: struct@crate::components::Element
 pub trait GenericElement<N: GenericNode>: 'static + Sized {
     /// 该元素对应的 [`NodeType`]。
     const TYPE: NodeType;

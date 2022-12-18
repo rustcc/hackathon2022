@@ -31,6 +31,8 @@ pub trait GenericComponent<N: GenericNode>: 'static + Sized {
     }
 }
 
+/// 将某个组件打包成 [`DynComponent`]，使用 [`DynComponent::id`] 而不是
+/// [`GenericComponent::id`] 来获取原始组件的 ID。
 pub struct DynComponent<N> {
     id: Option<TemplateId>,
     template: Template<N>,

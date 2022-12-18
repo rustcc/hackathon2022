@@ -75,6 +75,7 @@ pub trait GenericNode: 'static + Clone + Eq {
     fn insert_before(&self, node: &Self, position: Option<&Self>);
 }
 
+/// 节点类型。
 pub enum NodeType {
     /// 带有标签的节点，通常是 HTML 元素。
     Tag(Str),

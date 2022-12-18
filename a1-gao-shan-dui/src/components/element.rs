@@ -83,7 +83,10 @@ impl<N: GenericNode> Element<N> {
     /// 添加一个子结点。
     pub fn child<C: GenericComponent<N>>(mut self, child: C) -> Self {
         let Template { init, render } = child.build_template();
-        self.init_children = Box::new(move |root| init().append_to(root));
+        self.init_children = Box::new(move |root| {
+            (self.init_children)(root);
+            init().append_to(root);
+        });
         self.render_children = Box::new(move |first| {
             let node = (self.render_children)(first);
             render(node).next

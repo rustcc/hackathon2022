@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 mod component;
 mod element;
 mod node;
@@ -7,8 +9,10 @@ mod view;
 pub mod template;
 pub mod components {
     mod element;
+    mod fragment;
 
     pub use element::Element;
+    pub use fragment::Fragment;
 }
 
 #[doc(inline)]
