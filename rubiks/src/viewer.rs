@@ -4,6 +4,7 @@ use bevy_mod_picking::{PickableBundle, PickingEvent, PickingCameraBundle, Defaul
 use bevy_mod_raycast::{DefaultRaycastingPlugin, RaycastSource, RaycastMesh, Intersection, RaycastMethod, RaycastSystem};
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
+use std::time::Instant;
 
 /// 可视化插件
 pub struct ViewerPlugin;
@@ -17,6 +18,7 @@ impl Plugin for ViewerPlugin {
             .init_resource::<MoveSequence>()
             .init_resource::<ExecutingCommand>()
             .insert_resource(MouseDraggingRecorder { start_pos: None, piece: None })
+            .insert_resource(TimekeepingTimer( Instant::now() ))
             .register_type::<Piece>()
             .add_startup_system(setup)
             .add_system(create_cube_event)
@@ -48,6 +50,8 @@ pub struct CubeSettings {
     pub bottom_color: Color,
     /// 旋转速度
     pub rotate_speed: f32,
+    // 游玩模式
+    pub play_mode: PlayMode,
 }
 
 impl Default for CubeSettings {
@@ -61,7 +65,8 @@ impl Default for CubeSettings {
             right_color: Color::RED,
             top_color: Color::WHITE,
             bottom_color: Color::YELLOW,
-            rotate_speed: 1.0
+            rotate_speed: 1.0,
+            play_mode: PlayMode::Practice
         }
     }
 }
@@ -121,6 +126,17 @@ impl MouseDraggingRecorder {
         self.piece = None;
     }
 }
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum PlayMode {
+    // 练习模式
+    Practice, 
+    // 计时模式
+    Timekeeping
+}
+
+#[derive(Debug, Resource)]
+pub struct TimekeepingTimer(pub Instant);
 
 /// 先清除之前的魔方， 再生成新的魔方
 fn create_cube_event(

@@ -249,7 +249,7 @@ pub fn random_command(n: usize) -> Vec<Command> {
     let mut v = vec![];
     for _ in 0..n {
         let mov: usize = rng.gen();
-        let mov = MOVE_LIST[mov % 12];
+        let mov = MOVE_LIST[mov % 9];  // 暂时不让整个魔方旋转
         let ran: i64 = rng.gen();
         let rep = ran % 2 + 1;
         let rep = if ran % 2 == 0 { rep } else { -rep };
