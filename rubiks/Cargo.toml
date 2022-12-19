@@ -18,7 +18,7 @@ codegen-units = 1
 members = ["crates/rubiks_solver"]
 
 [features]
-dev = ["bevy/dynamic", "bevy-inspector-egui"]
+dev = ["bevy-inspector-egui"]
 
 [dependencies]
 bevy = "0.9"

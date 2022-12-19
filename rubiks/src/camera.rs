@@ -1,10 +1,11 @@
-use crate::core::MyRaycastSet;
 use bevy::app::{App, Plugin};
 use bevy::math::Vec3;
 use bevy::prelude::*;
 use bevy::prelude::{Camera3dBundle, Commands, Transform};
 use bevy_mod_picking::PickingCameraBundle;
-use bevy_mod_raycast::{Intersection, RaycastMethod, RaycastSource, RaycastSystem};
+use bevy_mod_raycast::{RaycastMethod, RaycastSource, RaycastSystem};
+
+use crate::core::MyRaycastSet;
 
 /// 相机插件
 pub struct CameraPlugin;
@@ -42,15 +43,5 @@ fn update_raycast_with_cursor(
 
     for mut pick_source in &mut query {
         pick_source.cast_method = RaycastMethod::Screenspace(cursor_position);
-    }
-}
-
-fn intersection(query: Query<&Intersection<MyRaycastSet>>) {
-    for intersection in &query {
-        info!(
-            "Distance {:?}, Position {:?}",
-            intersection.distance(),
-            intersection.position()
-        );
     }
 }

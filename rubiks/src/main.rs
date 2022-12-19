@@ -23,7 +23,7 @@ fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         window: WindowDescriptor {
-            title: "Rubiks's Cube".to_string(),
+            title: "Rubiks's Cube Simulator & Solver".to_string(),
             canvas: Some("#bevy".to_owned()),
             ..default()
         },
@@ -32,15 +32,16 @@ fn main() {
     .add_plugin(EguiPlugin)
     .add_plugin(BevyRubiksCubePlugin)
     .add_plugins(DefaultPickingPlugins)
-    // .add_plugin(DebugCursorPickingPlugin)
-    // .add_plugin(DebugEventsPickingPlugin)
     .add_plugin(DefaultRaycastingPlugin::<MyRaycastSet>::default())
     .add_startup_system(set_window_icon)
     .add_system(dashboard_ui);
 
     #[cfg(feature = "dev")]
     {
-        app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
+        app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new())
+        // .add_plugin(bevy_mod_picking::DebugCursorPickingPlugin)
+        // .add_plugin(bevy_mod_picking::DebugEventsPickingPlugin)
+        ;
     }
 
     app.run();
@@ -147,6 +148,13 @@ fn dashboard_ui(
                     {
                         solve_ev.send(SolvePuzzle);
                     }
+                }
+
+                if ui
+                    .add_sized([100.0, 30.0], egui::Button::new("Reset"))
+                    .clicked()
+                {
+                    create_ev.send(CreateCube::new(cube_settings.cube.size()));
                 }
 
                 ui.end_row();

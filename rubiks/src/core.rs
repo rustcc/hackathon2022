@@ -1,11 +1,40 @@
-use bevy::prelude::*;
-use rubiks_solver::{Face, Move};
 use std::f32::consts::{FRAC_PI_2, PI};
 use std::fmt::{Display, Formatter};
 
+use bevy::prelude::*;
+
+use rubiks_solver::{Face, Move};
+
+#[derive(Component, Debug, Clone, Copy)]
+pub enum EDGE {
+    UB,
+    UR,
+    UF,
+    UL,
+    FR,
+    FL,
+    BL,
+    BR,
+    DF,
+    DL,
+    DB,
+    DR,
+}
+
+#[derive(Component, Debug, Clone, Copy)]
+pub enum CORNER {
+    ULB,
+    URB,
+    URF,
+    ULF,
+    DLF,
+    DLB,
+    DRB,
+    DRF,
+}
+
 /// 块
-#[derive(Debug, Default, Component, Reflect, FromReflect, Clone, Copy)]
-#[reflect(Component)]
+#[derive(Debug, Default, Component, Clone, Copy)]
 pub struct Piece {
     /// 是几阶的魔方
     pub size: u8,
@@ -15,11 +44,22 @@ pub struct Piece {
     pub y: u8,
     /// z
     pub z: u8,
+    /// 棱
+    pub edge: Option<EDGE>,
+    /// 角
+    pub corner: Option<CORNER>,
 }
 
 impl Piece {
     pub fn new(size: u8, x: u8, y: u8, z: u8) -> Self {
-        Piece { size, x, y, z }
+        Piece {
+            size,
+            x,
+            y,
+            z,
+            edge: None,
+            corner: None,
+        }
     }
 
     /// 判断是不是需要旋转的块
@@ -34,6 +74,9 @@ impl Piece {
             Move::X(_) => true,
             Move::Y(_) => true,
             Move::Z(_) => true,
+            Move::M(_) => false,
+            Move::E(_) => false,
+            Move::S(_) => false,
             Move::Uw(n, _) => self.y == self.size - *n as u8,
             Move::Lw(n, _) => self.x == *n as u8 - 1,
             Move::Fw(n, _) => self.z == self.size - *n as u8,
@@ -55,12 +98,97 @@ impl Piece {
             _ => false,
         }
     }
+
+    pub fn is_corner(&self) -> bool {
+        self.x == 0 && self.y == 0 && self.z == 0
+            || self.x == 0 && self.y == 0 && self.z == self.size - 1
+            || self.x == 0 && self.y == self.size - 1 && self.z == 0
+            || self.x == 0 && self.y == self.size - 1 && self.z == self.size - 1
+            || self.x == self.size - 1 && self.y == 0 && self.z == 0
+            || self.x == self.size - 1 && self.y == 0 && self.z == self.size - 1
+            || self.x == self.size - 1 && self.y == self.size - 1 && self.z == 0
+            || self.x == self.size - 1 && self.y == self.size - 1 && self.z == self.size - 1
+    }
+
+    pub fn is_edge(&self) -> bool {
+        self.x == 0 && self.y == 0
+            || self.x == 0 && self.z == 0
+            || self.y == 0 && self.z == 0
+            || self.x == 0 && self.y == self.size - 1
+            || self.x == 0 && self.z == self.size - 1
+            || self.y == 0 && self.z == self.size - 1
+            || self.x == self.size - 1 && self.y == 0
+            || self.x == self.size - 1 && self.z == 0
+            || self.y == self.size - 1 && self.z == 0
+            || self.x == self.size - 1 && self.y == self.size - 1
+            || self.x == self.size - 1 && self.z == self.size - 1
+            || self.y == self.size - 1 && self.z == self.size - 1
+    }
+
+    pub fn is_up(&self) -> bool {
+        self.y == self.size - 1
+    }
+
+    pub fn get_up_n(&self) -> u8 {
+        self.size - self.y
+    }
+
+    pub fn is_down(&self) -> bool {
+        self.y == 0
+    }
+
+    pub fn get_down_n(&self) -> u8 {
+        self.y + 1
+    }
+
+    pub fn is_front(&self) -> bool {
+        self.z == self.size - 1
+    }
+
+    pub fn get_front_n(&self) -> u8 {
+        self.size - self.z
+    }
+
+    pub fn is_back(&self) -> bool {
+        self.z == 0
+    }
+
+    pub fn get_back_n(&self) -> u8 {
+        self.z + 1
+    }
+
+    pub fn is_left(&self) -> bool {
+        self.x == 0
+    }
+
+    pub fn get_left_n(&self) -> u8 {
+        self.x + 1
+    }
+
+    pub fn is_right(&self) -> bool {
+        self.x == self.size - 1
+    }
+
+    pub fn get_right_n(&self) -> u8 {
+        self.size - self.x
+    }
+
+    pub fn is_in_m_layer(&self) -> bool {
+        !self.is_left() && !self.is_right()
+    }
+
+    pub fn is_in_e_layer(&self) -> bool {
+        !self.is_up() && !self.is_down()
+    }
+
+    pub fn is_in_s_layer(&self) -> bool {
+        !self.is_front() && !self.is_back()
+    }
 }
 
 /// 表面
 #[derive(Component, PartialEq, Eq, Clone, Copy, Debug, Hash)]
 pub struct Surface {
-    pub current: Face,
     pub initial: Face,
 }
 
@@ -246,12 +374,3 @@ pub fn flatten(elems: Vec<Elem>) -> Vec<Move> {
 }
 
 pub struct MyRaycastSet;
-
-#[test]
-fn test_flatten() {
-    use rubiks_solver::MoveVariant::*;
-    let e = Elem::Group(vec![(Move::U(Standard)), Move::R(Standard)], -1);
-    let f = flatten(vec![e]);
-    assert_eq!(f, vec![Move::R(Inverse), Move::U(Inverse)]);
-    assert_eq!(f, vec![Command(BaseMove::R, -1), Command(BaseMove::U, -1)]);
-}

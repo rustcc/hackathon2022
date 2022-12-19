@@ -24,6 +24,9 @@ impl GeometricMove {
     pub fn from(mv: Move) -> Self {
         match (mv, 1) {
             (U(variant), n) | (Uw(n, variant), _) => modify_move(u_move(n), variant),
+            (M(variant), n) => modify_move(m_move(n), variant),
+            (E(variant), n) => modify_move(e_move(n), variant),
+            (S(variant), n) => modify_move(s_move(n), variant),
             (R(variant), n) | (Rw(n, variant), _) => modify_move(r_move(n), variant),
             (F(variant), n) | (Fw(n, variant), _) => modify_move(f_move(n), variant),
             (L(variant), n) | (Lw(n, variant), _) => modify_move(l_move(n), variant),
@@ -118,10 +121,32 @@ fn b_move(n: CubeSize) -> GeometricMove {
         Inverse,
     )
 }
+
 fn z_move() -> GeometricMove {
     GeometricMove {
         axis: Axis::Z,
         angle: 90.0,
         predicate: Box::new(|_| true),
+    }
+}
+
+fn m_move(n: CubeSize) -> GeometricMove {
+    GeometricMove {
+        predicate: Box::new(move |s| s.current.x == s.size - (n * 2)),
+        ..y_move()
+    }
+}
+
+fn e_move(n: CubeSize) -> GeometricMove {
+    GeometricMove {
+        predicate: Box::new(move |s| s.current.y == s.size - (n * 2)),
+        ..y_move()
+    }
+}
+
+fn s_move(n: CubeSize) -> GeometricMove {
+    GeometricMove {
+        predicate: Box::new(move |s| s.current.z == s.size - (n * 2)),
+        ..y_move()
     }
 }

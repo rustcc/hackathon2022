@@ -229,6 +229,12 @@ pub enum Move {
     Y(MoveVariant),
     /// 沿z轴转动整个魔方
     Z(MoveVariant),
+    /// 转动中间的X轴
+    M(MoveVariant),
+    /// 转动中间的Y轴
+    E(MoveVariant),
+    /// 转动中间的Z轴
+    S(MoveVariant),
 }
 
 impl Display for Move {
@@ -250,6 +256,9 @@ impl Move {
             | Move::X(v)
             | Move::Y(v)
             | Move::Z(v)
+            | Move::M(v)
+            | Move::E(v)
+            | Move::S(v)
             | Move::Uw(_, v)
             | Move::Lw(_, v)
             | Move::Fw(_, v)
@@ -293,6 +302,9 @@ impl Move {
             Move::Rw(_, _) => Vec3::X,
             Move::Bw(_, _) => Vec3::Z,
             Move::Dw(_, _) => Vec3::Y,
+            Move::M(_) => Vec3::X,
+            Move::E(_) => Vec3::Y,
+            Move::S(_) => Vec3::Z,
         }
     }
 
@@ -314,6 +326,9 @@ impl Move {
             Move::X(_) => Move::X(variant),
             Move::Y(_) => Move::Y(variant),
             Move::Z(_) => Move::Z(variant),
+            Move::M(_) => Move::M(variant),
+            Move::E(_) => Move::E(variant),
+            Move::S(_) => Move::S(variant),
         }
     }
 
@@ -334,12 +349,15 @@ impl Move {
             Move::X(_) => "X".to_string(),
             Move::Y(_) => "Y".to_string(),
             Move::Z(_) => "Z".to_string(),
+            Move::M(_) => "M".to_string(),
+            Move::E(_) => "E".to_string(),
+            Move::S(_) => "S".to_string(),
         }
     }
 
     /// 反转
     pub fn prime(&self) -> Move {
-        self.with_variant(self.get_variant().prime())
+        self.with_variant(self.get_variant().inverse())
     }
 }
 
@@ -348,7 +366,7 @@ impl Move {
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum MoveVariant {
     /// 90°顺时针转动
-    Standard = 1,
+    Standard = -1,
     /// 180°转动
     Double,
     /// 90°逆时针转动
@@ -367,7 +385,7 @@ impl Display for MoveVariant {
 }
 
 impl MoveVariant {
-    pub fn prime(&self) -> MoveVariant {
+    pub fn inverse(&self) -> MoveVariant {
         match self {
             MoveVariant::Standard => MoveVariant::Inverse,
             MoveVariant::Double => MoveVariant::Double,
