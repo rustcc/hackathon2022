@@ -145,6 +145,8 @@ type RawSignal = Box<dyn Any>;
 struct SignalContext {
     /// [`Signal`] 所影响的全部 [`Effect`]，写入 [`Signal`] 时被触发。
     subscribers: HashSet<EffectId>,
+    // 这里我们也可以使用 `IndexMap` 来保留 [`Effect`] 订阅的顺序，以便于
+    // 使嵌套 [`Effect`] 中最内层的可以最先被触发。
 }
 
 impl<T> Signal<T> {
