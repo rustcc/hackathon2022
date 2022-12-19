@@ -1,6 +1,6 @@
 use crate::{
-    untrack, view, GenericComponent, GenericElement, GenericNode, IntoReactive, Reactive, Scope,
-    View,
+    untrack, view, view::ViewParentExt, GenericComponent, GenericElement, GenericNode,
+    IntoReactive, Reactive, Scope, View,
 };
 
 define_placeholder!(Placeholder("空 `akun::List` 的占位符"));
@@ -49,46 +49,41 @@ where
             let placeholder = View::node(placeholder.into_node());
             let mut mounted_fragment = Vec::new();
             let mounted_view = cx.create_signal(placeholder.clone());
-            let mut unmounted_parent = None;
             cx.create_effect(move || {
                 // 只需要跟踪 `each` 的变化。
                 let each = each.clone().into_value();
                 untrack(|| {
                     let current_view = mounted_view.get();
-                    let parent = current_view.parent_or(|| {
-                        unmounted_parent
-                            .get_or_insert_with(N::empty_template)
-                            .clone()
-                    });
+                    let parent = current_view.parent();
                     let next_sibling = current_view.next_sibling();
                     let mounted_len = mounted_fragment.len();
                     let mut new_len = 0;
                     for val in each.iter() {
                         // 将新增的视图挂载到当前视图之后。
                         if new_len >= mounted_len {
-                            let view = fn_view(val);
-                            view.move_before(&parent, next_sibling.as_ref());
-                            mounted_fragment.push(view);
+                            let new_view = fn_view(val);
+                            parent.insert_before(&new_view, next_sibling.as_ref());
+                            mounted_fragment.push(new_view);
                         }
                         new_len += 1;
                     }
                     if new_len == 0 {
                         // 用占位符替换掉空的视图。
                         if mounted_len != 0 {
-                            current_view.replace_with(&parent, &placeholder);
+                            parent.replace_child(&placeholder, &current_view);
                             mounted_fragment.clear();
                             mounted_view.set(placeholder.clone());
                         }
                     } else if new_len > mounted_len {
                         // 移除占位符。
                         if mounted_len == 0 {
-                            placeholder.remove_from(&parent);
+                            parent.remove_child(&placeholder);
                         }
                         mounted_view.set(View::fragment(mounted_fragment.clone()))
                     } else if new_len < mounted_len {
                         // 移除多余的视图。
                         for view in mounted_fragment.drain(new_len..) {
-                            view.remove_from(&parent);
+                            parent.remove_child(&view);
                         }
                         mounted_view.set(View::fragment(mounted_fragment.clone()))
                     }

@@ -81,9 +81,19 @@ impl<N: GenericNode> View<N> {
         }
     }
 
-    /// 将全部节点并逐个附加至 `parent`，动态试图会被立即执行。
-    pub fn append_to(&self, parent: &N) {
-        self.visit(|t| parent.append_child(t));
+    /// 检查两个 [`View`] 的引用是否相等。
+    pub fn ref_eq(&self, other: &Self) -> bool {
+        match (&self.0, &other.0) {
+            (VT::Node(t1), VT::Node(t2)) => t1.eq(t2),
+            (VT::Fragment(t1), VT::Fragment(t2)) => Rc::ptr_eq(t1, t2),
+            // NOTE: https://rust-lang.github.io/rust-clippy/master/index.html#vtable_address_comparisons
+            (VT::Dyn(t1), VT::Dyn(t2)) => {
+                let ptr1 = Rc::as_ptr(t1).cast::<()>();
+                let ptr2 = Rc::as_ptr(t2).cast::<()>();
+                ptr1 == ptr2
+            }
+            _ => false,
+        }
     }
 
     pub fn first(&self) -> N {
@@ -108,34 +118,17 @@ impl<N: GenericNode> View<N> {
         }
     }
 
-    /// 如果当前视图被挂载则返回其父级节点，否则当前视图将被挂载的 `fallback()` 返回的节点上。
-    pub fn parent_or(&self, fallback: impl FnOnce() -> N) -> N {
-        if let Some(parent) = self.first().parent() {
-            parent
-        } else {
-            let parent = fallback();
-            self.append_to(&parent);
-            parent
-        }
+    pub fn parent(&self) -> Option<N> {
+        self.first().parent()
     }
 
     pub fn next_sibling(&self) -> Option<N> {
         self.last().next_sibling()
     }
 
-    /// 检查两个 [`View`] 的引用是否相等。
-    pub fn ref_eq(&self, other: &Self) -> bool {
-        match (&self.0, &other.0) {
-            (VT::Node(t1), VT::Node(t2)) => t1.eq(t2),
-            (VT::Fragment(t1), VT::Fragment(t2)) => Rc::ptr_eq(t1, t2),
-            // NOTE: https://rust-lang.github.io/rust-clippy/master/index.html#vtable_address_comparisons
-            (VT::Dyn(t1), VT::Dyn(t2)) => {
-                let ptr1 = Rc::as_ptr(t1).cast::<()>();
-                let ptr2 = Rc::as_ptr(t2).cast::<()>();
-                ptr1 == ptr2
-            }
-            _ => false,
-        }
+    /// 将全部节点并逐个附加至 `parent`，动态试图会被立即执行。
+    pub fn append_to(&self, parent: &N) {
+        self.visit(|t| parent.append_child(t));
     }
 
     pub fn replace_with(&self, parent: &N, new_view: &Self) {
@@ -153,5 +146,40 @@ impl<N: GenericNode> View<N> {
 
     pub fn move_before(&self, parent: &N, position: Option<&N>) {
         self.visit(|t| parent.insert_before(t, position));
+    }
+}
+
+/// 辅助特性，忽略掉当一个视图被卸载时的节点操作。
+pub trait ViewParentExt<N: GenericNode> {
+    fn as_ref(&self) -> Option<&N>;
+
+    fn append_child(&self, new_view: &View<N>) {
+        if let Some(parent) = self.as_ref() {
+            new_view.remove_from(parent);
+        }
+    }
+
+    fn replace_child(&self, new_view: &View<N>, position: &View<N>) {
+        if let Some(parent) = self.as_ref() {
+            position.replace_with(parent, new_view);
+        }
+    }
+
+    fn remove_child(&self, position: &View<N>) {
+        if let Some(parent) = self.as_ref() {
+            position.remove_from(parent);
+        }
+    }
+
+    fn insert_before(&self, new_view: &View<N>, position: Option<&N>) {
+        if let Some(parent) = self.as_ref() {
+            new_view.move_before(parent, position);
+        }
+    }
+}
+
+impl<N: GenericNode> ViewParentExt<N> for Option<N> {
+    fn as_ref(&self) -> Option<&N> {
+        Option::as_ref(self)
     }
 }
