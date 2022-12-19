@@ -1,0 +1,16 @@
+.DS_Store
+.vite-ssg-dist
+.vite-ssg-temp
+*.local
+# dist
+dist-ssr
+node_modules
+.idea/
+*.log
+*.lock
+.env
+dist
+./src/auto-imports.d.ts
+./src/components.d.ts
+pnpm-lock.yaml
+/_tmp

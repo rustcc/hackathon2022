@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-h-full bg-gray-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="msapplication-TileColor" content="#00aba9">
+  <link rel="icon" href="/pwa-192x192.png" type="image/png">     
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    // dark mode
+    // (function() {
+    //   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    //   const setting = localStorage.getItem('vueuse-color-scheme') || 'auto'
+    //   if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    //     document.documentElement.classList.toggle('dark', true)
+    // })()
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/keccak256@latest/keccak256.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/merkletreejs@latest/merkletree.js"></script>
+<script>
+  window.global = window
+</script>
+<script type="module">
+import process from 'process'
+import { Buffer } from 'buffer'
+import EventEmitter from 'events'
+window.Buffer = Buffer
+window.process = process
+window.EventEmitter = EventEmitter
+window.keccak256 = keccak256
+window.MerkleTree = MerkleTree
+</script>
+
+</head>
+<body class="h-full overflow-hidden">
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

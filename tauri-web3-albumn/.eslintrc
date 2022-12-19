@@ -1,0 +1,10 @@
+{
+  "extends": "@antfu",
+  "globals": {
+    "keccak256": true,
+    "MerkleTree": true,
+  },
+  "rules": {
+    "no-setup-props-destructure": 0
+  }
+}
