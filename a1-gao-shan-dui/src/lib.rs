@@ -1,5 +1,6 @@
 #![allow(clippy::type_complexity)]
 
+/// 非公开 API。
 #[doc(hidden)]
 #[path = "private.rs"]
 pub mod __private;

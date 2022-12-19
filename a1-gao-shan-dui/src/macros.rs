@@ -1,3 +1,4 @@
+/// [`view!`] 宏的内部实现
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __view_internal {
@@ -17,9 +18,9 @@ macro_rules! __view_internal {
         $crate::__private::view_element(
             $cx,
             $path,
-            move |element| { element $($props)* }
+            move |__view| { __view $($props)* },
+            move |__view| { __view $($children)* },
         )
-        $($children)*
     };
     // 组件
     // ----
@@ -34,10 +35,13 @@ macro_rules! __view_internal {
         props=[$($props:tt)*]
         rest=[]
     ) => {
-        $path($cx)
-            $($props)*
-            $($children)*
-            .build()
+        $crate::__private::view_component(
+            $cx,
+            $path,
+            move |__view| { __view $($props)* },
+            move |__view| { __view $($children)* },
+            move |__view| { __view .build() },
+        )
     };
     // 解析 Properties 函数
     // -----------------
@@ -261,16 +265,26 @@ macro_rules! __view_internal {
     };
 }
 
+/// 生成一个唯一的 [`TemplateId`]，并使用当前模块路径以及行列号作为附加调试信息。
+///
+/// [`TemplateId`]: crate::template::TemplateId
+#[macro_export]
+macro_rules! id {
+    () => {{
+        thread_local! {
+            static __ID: $crate::template::TemplateId =
+                $crate::template::TemplateId::generate(concat!(module_path!(), ":", line!(), ":", column!()));
+        }
+        __ID.with($crate::template::TemplateId::clone)
+    }};
+}
+
+/// 便于声明 UI 的辅助宏，具体用例请参考 `akun::macros::tests`。
 #[macro_export]
 macro_rules! view {
     ($cx:expr, $($args:tt)*) => {{
-        thread_local! {
-            static __ID: $crate::template::TemplateId =
-                $crate::template::TemplateId::generate(concat!(module_path!(), ":", line!()));
-        }
-
         let __cx = $cx;
-        let __id = __ID.with(Clone::clone);
+        let __id = $crate::id!();
         $crate::__view_internal! {
             cx=[__cx]
             prefix=[*]

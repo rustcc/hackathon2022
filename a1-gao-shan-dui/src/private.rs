@@ -7,13 +7,28 @@ use crate::{
 pub fn view_element<N, E>(
     cx: Scope,
     _marker: fn(Scope) -> E,
-    render: impl 'static + FnOnce(E) -> E,
+    props: impl 'static + FnOnce(E) -> E,
+    children: impl 'static + FnOnce(Element<N>) -> Element<N>,
 ) -> Element<N>
 where
     N: GenericNode,
     E: GenericElement<N>,
 {
-    Element(cx).root(render)
+    let element = Element(cx).root(props);
+    children(element)
+}
+
+pub fn view_component<Init, U1, U2, Final>(
+    cx: Scope,
+    create: fn(Scope) -> Init,
+    props: impl 'static + FnOnce(Init) -> U1,
+    children: impl 'static + FnOnce(U1) -> U2,
+    build: impl 'static + FnOnce(U2) -> Final,
+) -> Final {
+    let component = create(cx);
+    let u1 = props(component);
+    let u2 = children(u1);
+    build(u2)
 }
 
 pub fn view_text<N, V: IntoReactive<String>>(cx: Scope, data: V) -> Element<N>
