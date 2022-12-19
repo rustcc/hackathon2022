@@ -95,6 +95,7 @@ pub enum NodeType {
     Template(StaticStr),
 }
 
+/// 使用 [`web_sys::Node`] 实现的 [`GenericNode`]。
 #[derive(Clone, Eq, PartialEq)]
 pub struct DomNode {
     node: web_sys::Node,
@@ -227,19 +228,21 @@ impl GenericNode for DomNode {
     }
 }
 
-pub fn render_to_body<C>(f: impl FnOnce(Scope) -> C)
+/// 将组件挂载到 `document.body` 上。
+pub fn mount_to_body<C>(f: impl FnOnce(Scope) -> C)
 where
     C: GenericComponent<DomNode>,
 {
-    BODY.with(|body| render_to(body, f));
+    BODY.with(|body| mount_to(body, f));
 }
 
-pub fn render_to<C>(root: &web_sys::Node, f: impl FnOnce(Scope) -> C)
+/// 将组件挂载到 `root` 上。
+pub fn mount_to<C>(root: &web_sys::Node, f: impl FnOnce(Scope) -> C)
 where
     C: GenericComponent<DomNode>,
 {
     let (_, disposer) = create_root(|cx| {
-        f(cx).render_to(&DomNode::from(root.clone()));
+        f(cx).mount_to(&DomNode::from(root.clone()));
     });
     std::mem::forget(disposer);
 }

@@ -20,9 +20,9 @@ pub trait GenericComponent<N: GenericNode>: 'static + Sized {
         self.into_dyn_component().render()
     }
 
-    /// 初始化模板，并在渲染阶段执行前将模板附加到 `parent`。
-    fn render_to(self, parent: &N) {
-        untrack(|| self.into_dyn_component().render_to(parent));
+    /// 初始化模板，并在渲染阶段执行前将模板挂载到 `parent`。
+    fn mount_to(self, parent: &N) {
+        untrack(|| self.into_dyn_component().mount_to(parent));
     }
 }
 
@@ -44,7 +44,7 @@ impl<N: GenericNode> GenericComponent<N> for DynComponent<N> {
         self.render_impl(|_| {})
     }
 
-    fn render_to(self, parent: &N) {
+    fn mount_to(self, parent: &N) {
         self.render_impl(|container| parent.append_child(container));
     }
 }

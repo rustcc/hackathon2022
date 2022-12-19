@@ -55,11 +55,11 @@ pub fn ViewRoot<N: GenericNode>(_: Scope) -> ViewRoot<N> {
 impl<N: GenericNode> GenericComponent<N> for ViewRoot<N> {
     fn build_template(self) -> Template<N> {
         if self.id.is_none() {
-            panic!("未指定 `view!` 的 ID");
+            panic!("`view!` 没有指定 ID");
         }
         let template = self
             .children
-            .expect("未指定 `view!` 的根组件")
+            .expect("`view!` 没有指定根组件")
             .build_template();
         Template {
             id: self.id,
@@ -83,7 +83,7 @@ impl<N: GenericNode> ViewRoot<N> {
 
     pub fn child<C: GenericComponent<N>>(mut self, child: C) -> Self {
         if self.children.is_some() {
-            panic!("`view!` 有且只能有一个组件");
+            panic!("`view!` 有且只能有一个根组件");
         }
         self.children = Some(child.into_dyn_component());
         self

@@ -18,9 +18,11 @@ mod view;
 pub mod components {
     mod element;
     mod fragment;
+    mod show;
 
     pub use element::Element;
     pub use fragment::Fragment;
+    pub use show::{Else, If, Show};
 }
 pub mod elements;
 pub mod template;
@@ -30,8 +32,8 @@ pub use {
     component::{DynComponent, GenericComponent},
     components::*,
     element::GenericElement,
-    elements::{IntoEventHandler, IntoReactive, Reactive},
-    node::{render_to, render_to_body, DomNode, EventHandler, GenericNode, NodeType},
+    elements::{IntoEventHandler, IntoReactive, Reactive, Reactive::Value},
+    node::{mount_to, mount_to_body, DomNode, EventHandler, GenericNode, NodeType},
     reactive::{create_root, untrack, Effect, Scope, ScopeDisposer, Signal},
     view::View,
 };

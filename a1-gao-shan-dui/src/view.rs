@@ -8,6 +8,8 @@ type ViewDyn<N> = Rc<dyn Fn() -> View<N>>;
 #[derive(Clone)]
 pub struct View<N>(ViewType<N>);
 
+use ViewType as VT;
+
 #[derive(Clone)]
 enum ViewType<N> {
     Node(N),
@@ -26,7 +28,7 @@ where
     F: 'static + Fn() -> View<N>,
 {
     fn from(f: F) -> Self {
-        Self(ViewType::Dyn(Rc::new(f)))
+        Self(VT::Dyn(Rc::new(f)))
     }
 }
 
@@ -39,7 +41,7 @@ impl<N: Clone> From<Signal<View<N>>> for View<N> {
 impl<N: GenericNode> View<N> {
     /// 创建一个节点视图。
     pub fn node(node: N) -> Self {
-        Self(ViewType::Node(node))
+        Self(VT::Node(node))
     }
 
     /// 创建一个片段视图。
@@ -51,7 +53,7 @@ impl<N: GenericNode> View<N> {
         if views.is_empty() {
             panic!("`View` 不允许为空")
         }
-        Self(ViewType::fragment(views))
+        Self(VT::fragment(views))
     }
 
     /// 对所有的节点执行 [`deep_clone`]，动态视图则拷贝其引用。
@@ -59,11 +61,9 @@ impl<N: GenericNode> View<N> {
     /// [`deep_clone`]: [`GenericNode::deep_clone`]
     pub fn deep_clone(&self) -> View<N> {
         Self(match &self.0 {
-            ViewType::Node(t) => ViewType::Node(t.deep_clone()),
-            ViewType::Fragment(t) => {
-                ViewType::fragment(t.iter().map(|t| t.deep_clone()).collect::<Vec<_>>())
-            }
-            ViewType::Dyn(t) => ViewType::Dyn(t.clone()),
+            VT::Node(t) => VT::Node(t.deep_clone()),
+            VT::Fragment(t) => VT::fragment(t.iter().map(|t| t.deep_clone()).collect::<Vec<_>>()),
+            VT::Dyn(t) => VT::Dyn(t.clone()),
         })
     }
 
@@ -75,9 +75,9 @@ impl<N: GenericNode> View<N> {
     /// 使用 `&mut impl ...` 防止递归调用时 `f` 的类型无限嵌套。
     fn visit_impl(&self, f: &mut impl FnMut(&N)) {
         match &self.0 {
-            ViewType::Node(t) => f(t),
-            ViewType::Fragment(t) => t.iter().for_each(|t| t.visit_impl(f)),
-            ViewType::Dyn(t) => t().visit_impl(f),
+            VT::Node(t) => f(t),
+            VT::Fragment(t) => t.iter().for_each(|t| t.visit_impl(f)),
+            VT::Dyn(t) => t().visit_impl(f),
         }
     }
 
@@ -90,9 +90,9 @@ impl<N: GenericNode> View<N> {
         let mut current = self.clone();
         loop {
             match current.0 {
-                ViewType::Node(t) => return t,
-                ViewType::Fragment(t) => current = t.first().unwrap().clone(),
-                ViewType::Dyn(t) => current = t(),
+                VT::Node(t) => return t,
+                VT::Fragment(t) => current = t.first().unwrap().clone(),
+                VT::Dyn(t) => current = t(),
             }
         }
     }
@@ -101,10 +101,42 @@ impl<N: GenericNode> View<N> {
         let mut current = self.clone();
         loop {
             match current.0 {
-                ViewType::Node(t) => return t,
-                ViewType::Fragment(t) => current = t.last().unwrap().clone(),
-                ViewType::Dyn(t) => current = t(),
+                VT::Node(t) => return t,
+                VT::Fragment(t) => current = t.last().unwrap().clone(),
+                VT::Dyn(t) => current = t(),
             }
         }
+    }
+
+    /// 检查两个 [`View`] 的引用是否相等。
+    pub fn ref_eq(&self, other: &Self) -> bool {
+        match (&self.0, &other.0) {
+            (VT::Node(t1), VT::Node(t2)) => t1.eq(t2),
+            (VT::Fragment(t1), VT::Fragment(t2)) => Rc::ptr_eq(t1, t2),
+            // NOTE: https://rust-lang.github.io/rust-clippy/master/index.html#vtable_address_comparisons
+            (VT::Dyn(t1), VT::Dyn(t2)) => {
+                let ptr1 = Rc::as_ptr(t1).cast::<()>();
+                let ptr2 = Rc::as_ptr(t2).cast::<()>();
+                ptr1 == ptr2
+            }
+            _ => false,
+        }
+    }
+
+    pub fn replace_with(&self, parent: &N, new_view: &Self) {
+        if let (VT::Node(old), VT::Node(new)) = (&self.0, &new_view.0) {
+            parent.replace_child(new, old);
+        } else {
+            new_view.move_before(parent, Some(&self.first()));
+            self.remove_from(parent);
+        }
+    }
+
+    pub fn remove_from(&self, parent: &N) {
+        self.visit(|t| parent.remove_child(t));
+    }
+
+    pub fn move_before(&self, parent: &N, position: Option<&N>) {
+        self.visit(|t| parent.insert_before(t, position));
     }
 }

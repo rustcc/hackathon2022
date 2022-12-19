@@ -3,7 +3,7 @@ use crate::{
     GenericComponent, GenericElement, GenericNode, Scope, View,
 };
 
-define_placeholder!(Placeholder("placeholder for an empty `akun::Fragment`"));
+define_placeholder!(Placeholder("空 `akun::Fragment` 组件的占位符"));
 
 type Views<N> = Vec<View<N>>;
 
@@ -33,7 +33,7 @@ impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
                 let next = render(node, &mut views);
                 if views.is_empty() {
                     // 跳过占位符
-                    let placeholder = next.expect("占位符");
+                    let placeholder = next.unwrap();
                     RenderOutput {
                         next: placeholder.next_sibling(),
                         view: View::node(placeholder),

@@ -24,7 +24,7 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
             render_children,
             ..
         } = self;
-        let (init, render) = init_and_render_root.expect("根节点尚未设定");
+        let (init, render) = init_and_render_root.expect("`Element` 没有指定 `root`");
         Template {
             id: None,
             init: Box::new(|| {
@@ -33,7 +33,7 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
                 View::node(root)
             }),
             render: Box::new(|node| {
-                let root = node.expect("根节点");
+                let root = node.unwrap();
                 let first_child = root.first_child();
                 let next = root.next_sibling();
                 let view = render(root);
@@ -76,7 +76,7 @@ impl<N: GenericNode> Element<N> {
         render: impl 'static + FnOnce(E) -> View<N>,
     ) -> Self {
         if self.init_and_render_root.is_some() {
-            panic!("重复设定根节点");
+            panic!("`Element` 有且只能有一个 `root`");
         }
         self.init_and_render_root = Some((
             Box::new(move || E::create(self.cx).into_node()),
