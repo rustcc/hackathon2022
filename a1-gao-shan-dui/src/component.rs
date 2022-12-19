@@ -72,7 +72,7 @@ impl<N: GenericNode> DynComponent<N> {
         let first_child = container.first_child();
         after_init(&container);
         // 2) 渲染阶段
-        let RenderOutput { view, next } = render(first_child);
+        let RenderOutput { view, next } = render(first_child.unwrap());
         // next 应该指向最后一个子结点的下一个节点，即 None
         debug_assert!(next.is_none());
         view

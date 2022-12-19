@@ -10,7 +10,7 @@ type Views<N> = Vec<View<N>>;
 /// 将多个组件组合成一个片段。
 pub struct Fragment<N> {
     init: Box<dyn FnOnce(&mut Views<N>)>,
-    render: Box<dyn FnOnce(Option<N>, &mut Views<N>) -> Option<N>>,
+    render: Box<dyn FnOnce(N, &mut Views<N>) -> Option<N>>,
 }
 
 impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
@@ -54,7 +54,8 @@ impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
 pub fn Fragment<N: GenericNode>(_: Scope) -> Fragment<N> {
     Fragment {
         init: Box::new(|_| {}),
-        render: Box::new(|first, _| first),
+        // 跳过第一次 render
+        render: Box::new(|first, _| Some(first)),
     }
 }
 
@@ -72,7 +73,7 @@ impl<N: GenericNode> Fragment<N> {
         });
         self.render = Box::new(move |first, views| {
             let node = (self.render)(first, views);
-            let RenderOutput { next, view } = render(node);
+            let RenderOutput { next, view } = render(node.unwrap());
             views.push(view);
             next
         });

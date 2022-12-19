@@ -32,8 +32,7 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
                 init_children(&root);
                 View::node(root)
             }),
-            render: Box::new(|node| {
-                let root = node.unwrap();
+            render: Box::new(|root| {
                 let first_child = root.first_child();
                 let next = root.next_sibling();
                 let view = render(root);
@@ -56,6 +55,7 @@ pub fn Element<N: GenericNode>(cx: Scope) -> Element<N> {
         cx,
         init_and_render_root: None,
         init_children: Box::new(|_| {}),
+        // 跳过第一次 render
         render_children: Box::new(|first| first),
     }
 }
@@ -94,7 +94,7 @@ impl<N: GenericNode> Element<N> {
         });
         self.render_children = Box::new(move |first| {
             let node = (self.render_children)(first);
-            render(node).next
+            render(node.unwrap()).next
         });
         self
     }

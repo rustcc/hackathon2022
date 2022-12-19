@@ -20,8 +20,7 @@ pub struct Template<N> {
     pub init: Box<dyn FnOnce() -> View<N>>,
     /// 渲染阶段执行，接受初始化后的首个节点，返回渲染后的 [`View`] 及其之后的
     /// 第一个兄弟节点。
-    // TODO: View 不可能为空，因此没必要使用 Option 作为参数
-    pub render: Box<dyn FnOnce(Option<N>) -> RenderOutput<N>>,
+    pub render: Box<dyn FnOnce(N) -> RenderOutput<N>>,
     // 对于 `init` 和 `render` 我们可以使用静态分发而非动态分发来换取更高的性能，
     // 但在实践中这样会导致闭包类型被层层嵌套，从而严重增加了类型复杂度，甚至一度使
     // 编译器陷入 `core dump` 错误。
