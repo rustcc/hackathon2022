@@ -1,7 +1,8 @@
 [package]
 name = "bevy_rubikscube"
 version = "0.1.0"
-authors = ["ZoOL <zhooul@gmail.com>"]
+authors = ["ZoOL <zhooul@gmail.com>", "lewiszlw <lewiszlw520@gmail.com>"]
+license = "MIT OR Apache-2.0"
 edition = "2021"
 
 [profile.dev.package."*"]
