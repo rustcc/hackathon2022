@@ -108,6 +108,21 @@ impl<N: GenericNode> View<N> {
         }
     }
 
+    /// 如果当前视图被挂载则返回其父级节点，否则当前视图将被挂载的 `fallback()` 返回的节点上。
+    pub fn parent_or(&self, fallback: impl FnOnce() -> N) -> N {
+        if let Some(parent) = self.first().parent() {
+            parent
+        } else {
+            let parent = fallback();
+            self.append_to(&parent);
+            parent
+        }
+    }
+
+    pub fn next_sibling(&self) -> Option<N> {
+        self.last().next_sibling()
+    }
+
     /// 检查两个 [`View`] 的引用是否相等。
     pub fn ref_eq(&self, other: &Self) -> bool {
         match (&self.0, &other.0) {

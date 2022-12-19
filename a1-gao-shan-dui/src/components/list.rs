@@ -49,15 +49,18 @@ where
             let placeholder = View::node(placeholder.into_node());
             let mut mounted_fragment = Vec::new();
             let mounted_view = cx.create_signal(placeholder.clone());
+            let mut unmounted_parent = None;
             cx.create_effect(move || {
                 // 只需要跟踪 `each` 的变化。
                 let each = each.clone().into_value();
                 untrack(|| {
                     let current_view = mounted_view.get();
-                    let (parent, next_sibling) = {
-                        let last = current_view.last();
-                        (last.parent().unwrap(), last.next_sibling())
-                    };
+                    let parent = current_view.parent_or(|| {
+                        unmounted_parent
+                            .get_or_insert_with(N::empty_template)
+                            .clone()
+                    });
+                    let next_sibling = current_view.next_sibling();
                     let mounted_len = mounted_fragment.len();
                     let mut new_len = 0;
                     for val in each.iter() {

@@ -36,6 +36,10 @@ pub trait GenericNode: 'static + Clone + Eq {
     /// 创建一个新的节点。
     fn create(ty: NodeType) -> Self;
 
+    fn empty_template() -> Self {
+        Self::create(NodeType::Template(None))
+    }
+
     /// 对某节点及其全部子结点执行深度复制。
     fn deep_clone(&self) -> Self;
 
@@ -92,7 +96,7 @@ pub enum NodeType {
     /// 身。对于 [`DomNode`]，通常是 [`DocumentFragment`]。
     ///
     /// [`DocumentFragment`]: web_sys::DocumentFragment
-    Template(StaticStr),
+    Template(Option<StaticStr>),
 }
 
 /// 使用 [`web_sys::Node`] 实现的 [`GenericNode`]。
@@ -121,7 +125,7 @@ impl GenericNode for DomNode {
                 // Debug 构建时将模板插入 Dom 中便于调试。
                 if cfg!(debug_assertions) {
                     let template = doc.create_element("template").unwrap_throw_val();
-                    if !data.is_empty() {
+                    if let Some(data) = data {
                         template
                             .set_attribute("data-akun-template-id", data)
                             .unwrap_throw_val();

@@ -57,7 +57,7 @@ impl<N: GenericNode> DynComponent<N> {
         // 1) 初始化阶段
         let TemplateContent { container } = {
             let init_template = move || {
-                let container = N::create(NodeType::Template(id.map(|id| id.data()).unwrap_or("")));
+                let container = N::create(NodeType::Template(id.map(|id| id.data())));
                 init().append_to(&container);
                 TemplateContent { container }
             };

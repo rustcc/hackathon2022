@@ -59,6 +59,8 @@ where
                 }))
                 .collect::<Vec<_>>();
             let mounted_view = cx.create_signal(placeholder);
+            // `current_view` 被卸载之后，如果重新渲染被触发，则在一个模板中执行渲染。
+            let mut unmounted_parent = None;
             cx.create_effect(move || {
                 for branch in branches.iter() {
                     let Branch::<N> {
@@ -74,7 +76,11 @@ where
                             // `placeholder` 最初的 `parent`，因为一个组件可能在模板
                             // 节点中完成第一次渲染，然后整体被挂载到其他的位置。故每次更新
                             // 视图时都需要重新获取 `current_view` 的父级。
-                            let parent = current_view.first().parent().unwrap();
+                            let parent = current_view.parent_or(|| {
+                                unmounted_parent
+                                    .get_or_insert_with(N::empty_template)
+                                    .clone()
+                            });
                             if !current_view.ref_eq(new_view) {
                                 current_view.replace_with(&parent, new_view);
                                 mounted_view.set(new_view.clone());
