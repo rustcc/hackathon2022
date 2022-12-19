@@ -1,7 +1,20 @@
 ## Tauri + Vue3 + Vitesse + Vite + Web3 + IPFS
 
-本项目是基于另一个纯前端的 Vue3 开源项目基础上加了 Web3 的去中心化存储技术 IPFS 及 Tauri.app 而开发出来的桌面端 app。
+本项目是基于另一个纯前端的 Vue3 开源项目(<https://github.com/NftTopBest/d-blog-to-earn>)基础上加了 Web3 的去中心化存储技术 IPFS 及 Tauri.app 而开发出来的桌面端 app。
 
 由于时间有限，故还未开发账号体系，目前是临时用我预先设置的一个 IPFS 的 Cid 来存储应用内的相册图片数据索引。
 
+用户修改数据或添加新的照片后，会出现保存按钮来让用户获得新的 CID。
+
 后续有精力会进一步开发 Web3 钱包登录方式并把相册数据加密后再存储到 Web3 里。
+
+## 应用功能
+
+## 用到的技术
+
+* Tauri.app(Rust)
+* IPFS, nft.storage(Web3去中心化文件存储)
+* Vite2
+* Vue3
+* TailwindCSS
+* Pinia
