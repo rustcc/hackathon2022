@@ -280,6 +280,7 @@ macro_rules! id {
 }
 
 /// 便于声明 UI 的辅助宏，具体用例请参考 `akun::macros::tests`。
+// TODO: 我们可以使用一个 proc_macro 来分辨是否为元素或者组件
 #[macro_export]
 macro_rules! view {
     ($cx:expr, $($args:tt)*) => {{

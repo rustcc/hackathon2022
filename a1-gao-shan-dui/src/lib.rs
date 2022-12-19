@@ -18,10 +18,12 @@ mod view;
 pub mod components {
     mod element;
     mod fragment;
+    mod list;
     mod show;
 
     pub use element::Element;
     pub use fragment::Fragment;
+    pub use list::List;
     pub use show::{Else, If, Show};
 }
 pub mod elements;
