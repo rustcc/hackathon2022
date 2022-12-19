@@ -8,6 +8,8 @@
 
 后续有精力会进一步开发 Web3 钱包登录方式并把相册数据加密后再存储到 Web3 里。
 
+<img src="./screenshot1.jpg" />
+
 ## 链接及相关展示资源
 
 * [前端代码](./src)
@@ -32,6 +34,8 @@
 * Vue3
 * TailwindCSS
 * Pinia
+
+<img src="./screenshot2.jpg" />
 
 ## 未来规划
 
