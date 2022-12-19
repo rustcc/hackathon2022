@@ -22,6 +22,7 @@ impl<T> UnwrapThrowValExt<T> for Result<T, wasm_bindgen::JsValue> {
 
 type StaticStr = &'static str;
 
+/// 最常用的用来设置属性的类型，其可以被转换成一个 [`JsValue`]，与 `JavaScript` 对接。
 #[derive(Clone)]
 pub enum Property {
     Boolean(bool),

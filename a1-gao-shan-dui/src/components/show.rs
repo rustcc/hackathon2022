@@ -60,6 +60,7 @@ where
                 .collect::<Vec<_>>();
             let mounted_view = cx.create_signal(placeholder);
             // `current_view` 被卸载之后，如果重新渲染被触发，则在一个模板中执行渲染。
+            // TODO: 我们应该可以只更新视图而不修改实际的节点树，在父级需要的时候由它负责修改整个节点树
             let mut unmounted_parent = None;
             cx.create_effect(move || {
                 for branch in branches.iter() {

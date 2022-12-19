@@ -19,7 +19,7 @@ pub enum Reactive<T> {
     Fn(Rc<dyn Fn() -> Reactive<T>>),
 }
 
-/// [`Into`] 的别名，便于接收一个响应性的值作为参数。
+/// [`Into<Reactive>`] 的别名，便于接收一个响应性的值作为参数。
 pub trait IntoReactive<T>: Into<Reactive<T>> {
     fn into_reactive(self) -> Reactive<T> {
         self.into()
@@ -136,7 +136,7 @@ macro_rules! impl_into_property_for_nums {
 
 impl_into_property_for_nums!(i8, u8, i16, u16, i32, u32, i64, u64, isize, usize);
 
-/// [`Into`] 的别名，便于接受一个事件处理者作为参数。
+/// [`Into<EventHandler>`] 的别名，便于接受一个事件处理者作为参数。
 pub trait IntoEventHandler: Into<EventHandler> {
     fn into_event_handler(self) -> EventHandler {
         self.into()
@@ -159,14 +159,14 @@ where
 /// 定义一些基本 HTML 元素。
 macro_rules! define_elements {
     ($($tag:ident),*$(,)?) => {$(
-        #[doc = concat!("`", stringify!($tag), "` HMTL 元素")]
+        #[doc = concat!("`", stringify!($tag), "` HMTL 元素。")]
         #[allow(non_camel_case_types)]
         pub struct $tag<N> {
             cx: Scope,
             node: N,
         }
 
-        #[doc = concat!("创建一个 [`struct@", stringify!($tag), "`] 元素")]
+        #[doc = concat!("创建一个 [`struct@", stringify!($tag), "`] 元素。")]
         pub fn $tag<N: GenericNode>(cx: Scope) -> $tag<N> {
             GenericElement::create(cx)
         }
