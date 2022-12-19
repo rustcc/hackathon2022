@@ -1,4 +1,4 @@
-# Prepare
+# 准备工作
 
 
 ```
@@ -10,18 +10,18 @@ cargo install -f wasm-bindgen-cli
 ```
 
 
-# Package
+# 打包
 ```
 cargo build --release --target wasm32-unknown-unknown
 ```
 
 
 ```
-cp ./assets/* -r ./out/
 
 wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/maze_of_ferris.wasm
 
 ```
 
-# Play online
+# 在线游玩
 
+[点我](https://willser.github.io/maze_of_ferris.html)
