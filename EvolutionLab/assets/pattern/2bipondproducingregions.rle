@@ -1,0 +1,5 @@
+#N 2bipondproducingregions.rle
+#C https://conwaylife.com/wiki/Bi-pond
+#C https://www.conwaylife.com/patterns/2bipondproducingregions.rle
+x = 28, y = 6, rule = B3/S23
+5bo20bo$4bo21bo$4bo20bobo$3bo19b2o2bo$b2o22b2o$o!

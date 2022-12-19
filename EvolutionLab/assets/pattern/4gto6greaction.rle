@@ -1,0 +1,5 @@
+#N 4gto6greaction.rle
+#C https://conwaylife.com/wiki/Over-unity_reaction
+#C https://www.conwaylife.com/patterns/4gto6greaction.rle
+x = 89, y = 66, rule = B3/S23
+obo$b2o$bo18$39bo$37bobo$38b2o37$86bobo$87b2o$87bo2$85b2o$84b2o$86bo!

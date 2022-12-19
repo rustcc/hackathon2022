@@ -1,0 +1,13 @@
+#N 5-engine Cordership synth
+#O Dave Greene
+#C 18-glider synthesis of the 5-engine Cordership.
+#C Completed 21 April 2017, following Luka Okanishi's discovery
+#C   of a three-glider switch engine synthesis
+#C https://conwaylife.com/wiki/65-engine_Cordership
+#C https://conwaylife.com/patterns/5enginecordership_synth.rle
+x = 162, y = 158, rule = B3/S23
+75bo$76bo$74b3o$109bo$107b2o$108b2o19$o66bobo$b2o65b2o$2o66bo32bo$100b
+o$100b3o2$32bo$33bo$31b3o78bo$111b2o$63bo47bobo$64bo$62b3o19$104b2o$
+104bobo$104bo8$159b2o$159bobo$159bo4$65b2o$66b2o$65bo$98bo$97b2o$97bob
+o23$34b2o$35b2o$34bo$99bo$98b2o$98bobo$130b3o$130bo$131bo8$3b2o$2bobo$
+4bo2$89b3o$89bo$90bo34$131b2o$130b2o$132bo!

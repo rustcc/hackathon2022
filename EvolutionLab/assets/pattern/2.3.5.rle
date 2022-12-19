@@ -1,0 +1,6 @@
+#N 2.3.5.rle
+#O Dean Hickerson, 1993
+#C https://conwaylife.com/wiki/2.3.5
+#C https://www.conwaylife.com/patterns/2.3.5.rle
+x = 10, y = 8, rule = B3/S23
+7bo$b3o3bo$6bo2bo$2o2bo$5bo2b2o$o2bo$2bo3b3o$2bo!

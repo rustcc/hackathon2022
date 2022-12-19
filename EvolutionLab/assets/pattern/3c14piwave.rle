@@ -1,0 +1,9 @@
+#N 3c/14 pi wave
+#O Unknown
+#C https://conwaylife.com/wiki/3c/14_pi_wave
+#C https://conwaylife.com/patterns/3c14piwave.rle
+x = 39, y = 39, rule = B3/S23
+2b3o2$o2b4o$obo33b3o$obo2bo30bo$2bobo31b3o$2bo2$31b3o$31bobo$31bobo4$
+30b3o2$28bo2b4o$22b3o3bobo$22bo5bobo2bo$22b3o5bobo$30bo2$17b3o$17bobo$
+17bobo4$16b3o2$14bo2b4o$8b3o3bobo$8bo5bobo2bo$8b3o5bobo$16bo2$3b3o$3bo
+bo$3bobo!

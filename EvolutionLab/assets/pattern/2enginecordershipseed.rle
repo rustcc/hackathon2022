@@ -1,0 +1,8 @@
+#N 2enginecordershipseed.rle
+#C https://conwaylife.com/wiki/Trigger
+#C https://www.conwaylife.com/patterns/2enginecordershipseed.rle
+x = 55, y = 48, rule = B3/S23
+29bo$28bobo$28b2o4$25bo$24bobo13b2o$25b2o13b2o3$25bo$24bobo$25b2o3$7bo
+4bo$6bobo2bobo38b2o$7b2o3b2o18b2o18bobo$32bobo18bo$b2o30bo$obo$bo19b2o
+$20bobo$21bo5$39bo$38bobo$39bo$7b2o$7b2o3$34bo$33bobo$34b2o2$15b2o$15b
+2o4$18b2o25b2o$18bobo24bobo$19bo25bo!

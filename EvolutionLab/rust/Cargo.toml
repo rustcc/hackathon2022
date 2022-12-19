@@ -1,0 +1,18 @@
+[package]
+name = "evolution"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+anyhow = "1.0.66"
+flutter_rust_bridge = "1.54.1"
+ndarray = {version = "0.15.6", features = ["rayon"]}
+rand = "0.8.5"
+
+[profile.release]
+#lto = true
+strip = true
+codegen-units = 1

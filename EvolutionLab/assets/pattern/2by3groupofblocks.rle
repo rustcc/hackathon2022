@@ -1,0 +1,5 @@
+#N 2by3groupofblocks.rle
+#C https://conwaylife.com/wiki/Bi-block
+#C https://www.conwaylife.com/patterns/2by3groupofblocks.rle
+x = 8, y = 5, rule = B3/S23
+2ob2ob2o$2ob2ob2o2$2ob2ob2o$2ob2ob2o!

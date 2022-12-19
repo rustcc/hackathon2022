@@ -1,0 +1,7 @@
+#N Four boats_synth
+#O 
+#C Glider synthesis of four boats (aka. hourglass).
+#C https://conwaylife.com/wiki/Four_boats
+x = 36, y = 36, rule = B3/S23
+33bo$33bobo$33b2o19$25b2o$16b3o6bobo$18bo6bo$17bo2$7b2o22bo$6bobo21b2o
+$8bo21bobo5$3o$2bo$bo!

@@ -1,0 +1,8 @@
+#N 1beacon_synth
+#O Tanner Jacobi
+#C Glider synthesis of 1 beacon
+#C https://conwaylife.com/wiki/1_beacon
+x = 72, y = 17, rule = B3/S23
+42bobo$43b2o$43bo6bo$48b2o$49b2o$67b2o$67b2o$69b2o$25b2o18b2o4bobo11b
+5obo$5b2o18bobo17bobo3b2o12bo5bo$3ob2o20b2o18b2o4bo13bob3o$2bo3bo60b2o
+$bo50b3o$54bo$2b2o49bo$2bobo$2bo!

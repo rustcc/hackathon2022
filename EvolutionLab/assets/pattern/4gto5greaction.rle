@@ -1,0 +1,5 @@
+#N 4gto5greaction.rle
+#C https://conwaylife.com/wiki/4g-to-5g_reaction
+#C https://www.conwaylife.com/patterns/4gto5greaction.rle
+x = 65, y = 49, rule = B3/S23
+obo$b2o$bo22$17bo$15bobo22bo$16b2o22bobo$40b2o19$63bo$62b2o$62bobo!

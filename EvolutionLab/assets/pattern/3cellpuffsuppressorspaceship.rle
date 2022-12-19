@@ -1,0 +1,10 @@
+#N 3cellpuffsuppressorspaceship.rle
+#C https://conwaylife.com/wiki/Puff_suppressor
+#C https://www.conwaylife.com/patterns/3cellpuffsuppressorspaceship.rle
+x = 33, y = 25, rule = B3/S23
+12bo$10b2obo$10b2o3bo$8bo3b2obo5bo$8b4ob2o3b4o7bobo$6bo6bo4b3o5bobo2bo
+$6b7o3bo3bo4bo2bo$3bobo6b2o2bo3bobob2o4bo$2b9o5bo2b2o8bo$b2o14bob2ob4o
+3bo2bo$2o4b2obo10bo3bo2bobo$b2o4bo8b3o6bobobo2bo$9bo6b2o6bo4b2o$b2o4bo
+8b3o6bobobo2bo$2o4b2obo10bo3bo2bobo$b2o14bob2ob4o3bo2bo$2b9o5bo2b2o8bo
+$3bobo6b2o2bo3bobob2o4bo$6b7o3bo3bo4bo2bo$6bo6bo4b3o5bobo2bo$8b4ob2o3b
+4o7bobo$8bo3b2obo5bo$10b2o3bo$10b2obo$12bo!

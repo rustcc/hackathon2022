@@ -1,0 +1,19 @@
+#N 2c/5 puffer 1
+#O Jason Summers
+#C 2c/5 glide-reflective dirty puffer, discovered 29 February 1999
+#C https://www.conwaylife.com/wiki/2c/5_orthogonal
+#C https://www.conwaylife.com/patterns/2c5puffer1.rle
+x = 112, y = 75, rule = B3/S23
+15bo13bo52bo13bo$14bobo11bobo50bobo11bobo$13b2ob2o9b2ob2o48b2ob2o9b2ob
+2o$13b2o3bo7bo3b2o48b2o3bo7bo3b2o$14bob4o5b4obo50bob4o5b4obo$14b2o3bo
+5bo3b2o50b2o3bo5bo3b2o$18b3o3b3o58b3o3b3o$15b2o2bo5bo2b2o52b2o2bo5bo2b
+2o$15b4o2b3o2b4o52b4o2b3o2b4o$15bobo3b3o3bobo52bobo3b3o3bobo$13b3o2bo
+7bo2b3o48b3o2bo7bo2b3o$18bo2bobo2bo58bo2bobo2bo$20bo3bo62bo3bo$13b2o
+15b2o48b2o15b2o$18b2o2bo2b2o58b2o2bo2b2o$21b3o64b3o6$87bo$86b3o$86bob
+2o$87b3o$87b2o4$4bo5bo90bo5bo$3b3o3b3o88b3o3b3o$2bo2bo3bo2bo86bo2bo3bo
+2bo$b3o7b3o84b3o7b3o$2bobo5bobo86bobo5bobo$4b2o3b2o90b2o3b2o$o4bo3bo4b
+o82bo4bo3bo4bo$5bo3bo92bo3bo$2o3bo3bo3b2o82b2o3bo3bo3b2o$2bo2bo3bo2bo
+86bo2bo3bo2bo$4bo5bo90bo5bo25$43bo5bo12bo5bo$42bobo3bobo10bobo3bobo$
+41b2ob2ob2ob2o8b2ob2ob2ob2o$41bo2bo3bo2bo8bo2bo3bo2bo$39b2ob2o5b2ob2o
+4b2ob2o5b2ob2o$40b2o9b2o6b2o9b2o$41b2o7b2o8b2o7b2o$42bo7bo10bo7bo$39b
+2o11b2o4b2o11b2o$40b3o7b3o6b3o7b3o$43bobobobo12bobobobo!

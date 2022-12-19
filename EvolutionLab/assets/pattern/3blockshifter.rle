@@ -1,0 +1,6 @@
+#N 3blockshifter.rle
+#O Paul Callahan, 1994
+#C https://conwaylife.com/wiki/Three-block_shifter
+#C https://www.conwaylife.com/patterns/3blockshifter.rle
+x = 73, y = 73, rule = B3/S23
+70bobo$70b2o$71bo56$bo$2bo$3o4$9b2o$9b2o6$3b2o4b2o$3b2o4b2o!

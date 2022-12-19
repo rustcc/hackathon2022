@@ -1,0 +1,22 @@
+#N 5c9wire.rle
+#C https://conwaylife.com/wiki/5c/9_wire
+#C https://www.conwaylife.com/patterns/5c9wire.rle
+x = 91, y = 86, rule = B3/S23
+41bo$6bo32b2o$4bobo33b2o$5b2o2$34bo$33bo$33b3o2$25bo$23b3o$22bo$22b2o
+6$26bo4b2o$25bobobo2bo$26b2ob3o2$26b6o$25bo6bo$25bo2b5o$23bobobo7bo$
+23b2o2bo2b6o$27bobo8bo3b2o$26b2obo2b7o2bo2bo$29bobo7b3obobo$bo27bobo2b
+5o3bobobob2o$b2o27b2obo6bo3bobobobo$obo30bo2b6o2bobo2b2o$33bobo6bobobo
+$32b2obo2b4obo2b5o$35bobo3bobobo4bo$5bo29bobobo3bobob2o$5b2o29bobob4ob
+o2b2o$4bobo31bo7bo3bo$38bob6ob3o3bo$37b2obo4bobo2b4o$40bo2bo3bobo6bo$
+40bobob4obo2b5o$39b2obo6bobo5b2o$42bob4obo2bob2obobo$42bobo2bob2obobob
+o2bo$41b2o2bo2bo3bobo4bob2o$43b2o4b4ob2o2b2o2bo$43bo3bobo6bo3bo$44b4ob
+ob5ob3o3bo$48bobo4bobo2b4o$46bo3bo2bo3bobo6bo$46b2o2bobob4obo2b5o$49b
+2obo6bobo5b2o$52bob4obo2bob2obobo$52bobo2bob2obobobo2bo$51b2o2bo2bo3bo
+bo4bob2o$53b2o4b4ob2o2b2o2bo$53bo3bobo6bo3bo$54b4obob5ob3o3bo$58bobo4b
+obo2b4o$56bo3bo2bo3bobo6bo$56b2o2bobob4obo2b5o$59b2obo6bobo5b2o$62bob
+4obo2bob2obobo$62bobo2bob2obobobo2bo$61b2o2bo2bo3bobo4bob2o$63b2o4b4ob
+2o2b2o2bo$63bo3bobo6bo3bo$64b4obob5ob3o3bo$68bobo4bobo2b4o$66bo3bo2bo
+3bobo6bo$66b2o2bobob4obo2b5o$69b2obo6bobo5b2o$72bob4obo2bob2obo2bo$72b
+obo2bob2obobobo2b2o$71b2o2bo2bo3bobo$73b2o4b4ob2o$73bo3bobo6bo$74b4obo
+b5obo$78bobo4bobo$76bo3bo2bo3b2o$76b2o2bobob3o2bo$79b2obo5bo$83bob3o$
+84b2o!
