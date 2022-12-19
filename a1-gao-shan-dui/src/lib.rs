@@ -35,9 +35,10 @@ pub use {
     components::*,
     element::GenericElement,
     elements::{IntoEventHandler, IntoReactive, Reactive, Reactive::Value},
-    node::{mount_to, mount_to_body, DomNode, EventHandler, GenericNode, NodeType},
+    node::{mount_to, mount_to_body, DomNode, EventHandler, GenericNode, NodeType, Property},
     reactive::{create_root, untrack, Effect, Scope, ScopeDisposer, Signal},
     view::View,
+    web_sys::Event,
 };
 
 /// 创建一个元素组件 [`struct@Element`]。

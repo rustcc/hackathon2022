@@ -1,7 +1,7 @@
 use crate::{
     elements::IntoReactive,
     template::{Template, TemplateId},
-    DynComponent, Element, GenericComponent, GenericElement, GenericNode, Scope,
+    DynComponent, Element, GenericComponent, GenericElement, GenericNode, Property, Scope,
 };
 
 pub fn view_element<N, E>(
@@ -31,7 +31,7 @@ pub fn view_component<Init, U1, U2, Final>(
     build(u2)
 }
 
-pub fn view_text<N, V: IntoReactive<String>>(cx: Scope, data: V) -> Element<N>
+pub fn view_text<N, V: IntoReactive<Property>>(cx: Scope, data: V) -> Element<N>
 where
     N: GenericNode,
 {

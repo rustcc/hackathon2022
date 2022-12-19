@@ -2,7 +2,7 @@
 mod text_;
 pub use text_::text;
 
-use crate::{EventHandler, GenericElement, GenericNode, NodeType, Scope, Signal};
+use crate::{EventHandler, GenericElement, GenericNode, NodeType, Property, Scope, Signal};
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
@@ -66,16 +66,10 @@ macro_rules! impl_into_reactive {
                 Reactive::Value(t)
             }
         }
-
-        impl From<$ty> for Reactive<String> {
-            fn from(t: $ty) -> Self {
-                Reactive::Value(t.to_string())
-            }
-        }
     )*};
 }
 
-impl_into_reactive!(bool, i8, u8, i16, u16, char, i32, u32, i64, u64, isize, usize, i128, u128,);
+impl_into_reactive!(bool, i8, u8, i16, u16, char, i32, u32, i64, u64, isize, usize, i128, u128);
 
 /// 为一些泛型类型实现 [`IntoReactive`]。
 macro_rules! impl_into_reactive_generic {
@@ -99,17 +93,48 @@ macro_rules! impl_into_reactive_generic {
 
 impl_into_reactive_generic!(Rc, Option, Vec, RefCell, Cell);
 
-impl From<String> for Reactive<String> {
-    fn from(t: String) -> Self {
-        Reactive::Value(t)
+impl From<bool> for Reactive<Property> {
+    fn from(t: bool) -> Self {
+        Reactive::Value(Property::Boolean(t))
     }
 }
 
-impl From<&str> for Reactive<String> {
-    fn from(t: &str) -> Self {
-        Reactive::Value(t.to_owned())
+impl From<f64> for Reactive<Property> {
+    fn from(t: f64) -> Self {
+        Reactive::Value(Property::Number(t))
     }
 }
+
+impl From<String> for Reactive<Property> {
+    fn from(t: String) -> Self {
+        Reactive::Value(Property::String(t))
+    }
+}
+
+impl From<&str> for Reactive<Property> {
+    fn from(t: &str) -> Self {
+        Reactive::Value(Property::String(t.to_owned()))
+    }
+}
+
+impl From<char> for Reactive<Property> {
+    fn from(t: char) -> Self {
+        Reactive::Value(Property::String(t.to_string()))
+    }
+}
+
+/// 为一些数字类型实现 [`IntoReactive<Property>`]。
+macro_rules! impl_into_property_for_nums {
+    ($($ty:ident),*$(,)?) => {$(
+        impl From<$ty> for Reactive<Property> {
+            fn from(t: $ty) -> Self {
+                (t as f64).into_reactive()
+            }
+        }
+    )*};
+}
+
+impl_into_property_for_nums!(i8, u8, i16, u16, i32, u32, i64, u64, isize, usize);
 
 /// [`Into`] 的别名，便于接受一个事件处理者作为参数。
 pub trait IntoEventHandler: Into<EventHandler> {
@@ -158,21 +183,21 @@ macro_rules! define_elements {
 
         impl<N: GenericNode> $tag<N> {
             /// 设定 `property`，`val` 的值将会被跟踪并动态更新。
-            pub fn prop<V: IntoReactive<String>>(self, name: StaticStr, val: V) -> Self {
+            pub fn prop<V: IntoReactive<Property>>(self, name: StaticStr, val: V) -> Self {
                 let node = self.node.clone();
                 let val = val.into_reactive();
                 self.cx.create_effect(move || {
-                    node.set_property(name, &val.clone().into_value());
+                    node.set_property(name, val.clone().into_value());
                 });
                 self
             }
 
             /// 设定 `attribute`，`val` 的值将会被跟踪并动态更新。
-            pub fn attr<V: IntoReactive<String>>(self, name: StaticStr, val: V) -> Self {
+            pub fn attr<V: IntoReactive<Property>>(self, name: StaticStr, val: V) -> Self {
                 let node = self.node.clone();
                 let val = val.into_reactive();
                 self.cx.create_effect(move || {
-                    node.set_attribute(name, &val.clone().into_value());
+                    node.set_attribute(name, val.clone().into_value());
                 });
                 self
             }

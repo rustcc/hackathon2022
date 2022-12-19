@@ -22,6 +22,23 @@ impl<T> UnwrapThrowValExt<T> for Result<T, wasm_bindgen::JsValue> {
 
 type StaticStr = &'static str;
 
+#[derive(Clone)]
+pub enum Property {
+    Boolean(bool),
+    Number(f64),
+    String(String),
+}
+
+impl Property {
+    pub fn into_string(self) -> String {
+        match self {
+            Self::Boolean(t) => t.to_string(),
+            Self::Number(t) => t.to_string(),
+            Self::String(s) => s,
+        }
+    }
+}
+
 /// 处理一个节点引发的事件。
 pub struct EventHandler {
     pub handler: Box<dyn FnMut(web_sys::Event)>,
@@ -44,10 +61,10 @@ pub trait GenericNode: 'static + Clone + Eq {
     fn deep_clone(&self) -> Self;
 
     /// 设定节点的固有属性，对于 Dom 节点，大部分属性通过此方法进行更新。
-    fn set_property(&self, name: &str, val: &str);
+    fn set_property(&self, name: &str, val: Property);
 
     /// 设定节点的任意属性，对于 Dom 节点，`data-*` 属性通过此方法进行更新。
-    fn set_attribute(&self, name: &str, val: &str);
+    fn set_attribute(&self, name: &str, val: Property);
 
     /// 设定节点内部文本。
     fn set_inner_text(&self, data: &str);
@@ -152,19 +169,23 @@ impl GenericNode for DomNode {
         }
     }
 
-    fn set_property(&self, name: &str, attr: &str) {
+    fn set_property(&self, name: &str, val: Property) {
         Reflect::set(
             &self.node,
             &JsValue::from_str(name),
-            &JsValue::from_str(attr),
+            &match val {
+                Property::Boolean(t) => JsValue::from_bool(t),
+                Property::Number(t) => JsValue::from_f64(t),
+                Property::String(t) => JsValue::from_str(&t),
+            },
         )
         .unwrap_throw_val();
     }
 
-    fn set_attribute(&self, name: &str, val: &str) {
+    fn set_attribute(&self, name: &str, val: Property) {
         self.node
             .unchecked_ref::<web_sys::Element>()
-            .set_attribute(name, val)
+            .set_attribute(name, &val.into_string())
             .unwrap_throw_val();
     }
 

@@ -1,5 +1,5 @@
 use super::IntoReactive;
-use crate::{GenericElement, GenericNode, NodeType, Scope};
+use crate::{GenericElement, GenericNode, NodeType, Property, Scope};
 
 /// 文本节点。
 #[allow(non_camel_case_types)]
@@ -9,11 +9,11 @@ pub struct text<N> {
 }
 
 impl<N: GenericNode> text<N> {
-    pub fn data<A: IntoReactive<String>>(self, data: A) -> Self {
+    pub fn data<A: IntoReactive<Property>>(self, data: A) -> Self {
         let node = self.node.clone();
         let data = data.into_reactive();
         self.cx
-            .create_effect(move || node.set_inner_text(&data.clone().into_value()));
+            .create_effect(move || node.set_inner_text(&data.clone().into_value().into_string()));
         text {
             cx: self.cx,
             node: self.node,
