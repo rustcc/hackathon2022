@@ -384,6 +384,16 @@ impl Scope {
         id.try_run().unwrap();
     }
 
+    /// 创建一个 [`Effect`]，每次都在一个子 [`Scope`] 中运行。
+    pub fn create_effect_scoped(&self, mut f: impl 'static + FnMut(Scope)) {
+        let cx = *self;
+        let mut prev_disposer = None;
+        self.create_effect(move || {
+            drop(prev_disposer.take());
+            prev_disposer = Some(cx.create_child(&mut f).1);
+        })
+    }
+
     /// 创建一个 [`Signal`]，其跟踪 `f` 的返回值，每当其返回新值时，该 [`Signal`]
     /// 会随之更新。
     pub fn create_memo<T>(&self, mut f: impl 'static + FnMut() -> T) -> Signal<T> {
