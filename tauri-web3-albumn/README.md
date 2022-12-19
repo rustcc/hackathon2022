@@ -14,7 +14,7 @@
 * [界面截图](./screenshot)
 * [Mac 应用下载](./build)
 * [在线视频演示loom 平台](https://www.loom.com/share/670f0a3d18674c01abbc5ed5da9cf94e)
-* [github内的视频](./screenshot/demo.mp4)
+* [上传到 github 的视频](./screenshot/demo.mp4)
 
 ## 应用功能
 
