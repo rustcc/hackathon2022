@@ -20,15 +20,29 @@ use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
 use rubiks_solver::Cube;
 
 fn main() {
-    let mut app = App::new();
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
-        window: WindowDescriptor {
-            title: "Rubiks's Cube Simulator & Solver".to_string(),
-            canvas: Some("#bevy".to_owned()),
+    let log = if cfg!(feature = "dev") {
+        bevy::log::LogPlugin {
+            level: bevy::log::Level::DEBUG,
+            filter: "wgpu=warn,bevy_ecs=info".to_string(),
             ..default()
-        },
-        ..default()
-    }))
+        }
+    } else {
+        bevy::log::LogPlugin::default()
+    };
+
+    let mut app = App::new();
+    app.add_plugins(
+        DefaultPlugins
+            .set(WindowPlugin {
+                window: WindowDescriptor {
+                    title: "Rubiks's Cube Simulator & Solver".to_string(),
+                    canvas: Some("#bevy".to_owned()),
+                    ..default()
+                },
+                ..default()
+            })
+            .set(log),
+    )
     .add_plugin(EguiPlugin)
     .add_plugin(BevyRubiksCubePlugin)
     .add_plugins(DefaultPickingPlugins)

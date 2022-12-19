@@ -1,10 +1,14 @@
-use crate::generic_cube::{Move, MoveVariant, CubeSize};
 use crate::generic_cube::Move::*;
 use crate::generic_cube::MoveVariant::*;
+use crate::generic_cube::{CubeSize, Move, MoveVariant};
 
-/// Converts a WCA Notation scramble into ``Vec<Move>``.
+/// 将WCA的旋转命令改为通用的旋转命令
 pub fn parse_scramble(scramble: String) -> Vec<Move> {
-    scramble.trim().split_whitespace().map(convert_move).collect()
+    scramble
+        .trim()
+        .split_whitespace()
+        .map(convert_move)
+        .collect()
 }
 
 fn convert_move(mv: &str) -> Move {
@@ -22,7 +26,7 @@ fn convert_move(mv: &str) -> Move {
             "x" => X(variant),
             "y" => Y(variant),
             "z" => Z(variant),
-            _ => panic!()
+            _ => panic!(),
         }
     } else if mv.contains('U') {
         Uw(slice, variant)
@@ -94,8 +98,14 @@ pub fn simplify_moves(moves: &[Move]) -> Vec<Move> {
     }
 
     // keep track of the current move and its amount of clockwise turns
-    struct Movement { pub mv: Move, pub total_turns: u8 }
-    let mut movement: Movement = Movement { mv: moves[0], total_turns: moves[0].get_variant() as u8};
+    struct Movement {
+        pub mv: Move,
+        pub total_turns: u8,
+    }
+    let mut movement: Movement = Movement {
+        mv: moves[0],
+        total_turns: moves[0].get_variant() as u8,
+    };
 
     // returns a Move if the simplified movement has any effect on a cube
     fn movement_to_move(m: Movement) -> Option<Move> {
@@ -112,13 +122,22 @@ pub fn simplify_moves(moves: &[Move]) -> Vec<Move> {
         if discriminant(&movement.mv) == discriminant(mv) {
             movement.total_turns = (movement.total_turns + mv.get_variant() as u8) % 4;
         } else {
-            if let Some(m) = movement_to_move(movement) { result.push(m) };
-            movement = Movement { mv: *mv, total_turns: mv.get_variant() as u8 };
+            if let Some(m) = movement_to_move(movement) {
+                result.push(m)
+            };
+            movement = Movement {
+                mv: *mv,
+                total_turns: mv.get_variant() as u8,
+            };
         }
     }
-    if let Some(m) = movement_to_move(movement) { result.push(m) };
+    if let Some(m) = movement_to_move(movement) {
+        result.push(m)
+    };
 
     // don't recurse if moves couldn't be simplified further
-    if result.len() == moves.len() { return result }
+    if result.len() == moves.len() {
+        return result;
+    }
     simplify_moves(result.as_slice())
 }

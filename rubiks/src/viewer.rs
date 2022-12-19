@@ -9,8 +9,7 @@ use bevy_mod_raycast::{Intersection, RaycastMesh};
 use rubiks_solver::prelude::ORDERED_FACES;
 use rubiks_solver::{rand_moves, solve, Cube, Face, FaceletCube, Move, MoveVariant};
 
-use crate::core::{flatten, MyRaycastSet, Piece, Surface};
-use crate::parser;
+use crate::core::{MyRaycastSet, Piece, Surface};
 
 /// 显示的模块的尺寸
 const BOX_SIZE: f32 = 1.0;
@@ -444,21 +443,13 @@ fn generate_command(
         if delta_x.abs() > delta_z.abs() {
             debug!("x+ {}", delta_x);
             // x轴变化大，沿z轴旋转
-            let rotate = if piece.is_up() {
-                if delta_x > 0.0 {
-                    MoveVariant::Inverse
-                } else {
-                    MoveVariant::Standard
-                }
+            let rotate = if delta_x > 0.0 {
+                MoveVariant::Standard
             } else {
-                if delta_x > 0.0 {
-                    MoveVariant::Standard
-                } else {
-                    MoveVariant::Inverse
-                }
+                MoveVariant::Inverse
             };
             if piece_translation.z.round() == -1.0 {
-                return Move::B(rotate);
+                return Move::B(rotate.inverse());
             } else if piece_translation.z.round() == 0.0 {
                 return Move::S(rotate);
             } else {
@@ -467,18 +458,10 @@ fn generate_command(
         } else {
             debug!("z++ {}", delta_z);
             // z轴变化大，沿x轴旋转
-            let rotate = if piece.is_up() {
-                if delta_z > 0.0 {
-                    MoveVariant::Inverse
-                } else {
-                    MoveVariant::Standard
-                }
+            let rotate = if delta_z > 0.0 {
+                MoveVariant::Standard
             } else {
-                if delta_z > 0.0 {
-                    MoveVariant::Standard
-                } else {
-                    MoveVariant::Inverse
-                }
+                MoveVariant::Inverse
             };
 
             if piece_translation.x.round() == -1.0 {
@@ -518,21 +501,13 @@ fn generate_command(
         } else {
             // y轴变化大，沿x轴旋转
             debug!("y++ {}", delta_y);
-            let rotate = if piece.is_up() {
-                if delta_y > 0.0 {
-                    MoveVariant::Inverse
-                } else {
-                    MoveVariant::Standard
-                }
+            let rotate = if delta_y > 0.0 {
+                MoveVariant::Standard
             } else {
-                if delta_y > 0.0 {
-                    MoveVariant::Standard
-                } else {
-                    MoveVariant::Inverse
-                }
+                MoveVariant::Inverse
             };
             if piece_translation.x.round() == -1.0 {
-                return Move::L(rotate);
+                return Move::L(rotate.inverse());
             } else if piece_translation.x.round() == 0.0 {
                 return Move::M(rotate);
             } else {
@@ -561,20 +536,28 @@ fn solve_puzzle(
 }
 
 fn keyboard_input_system(keyboard_input: Res<Input<KeyCode>>, mut move_seq: ResMut<MoveSequence>) {
-    if keyboard_input.just_pressed(KeyCode::Q) {
-        let s = "R'B2LU'L2B'L2D2B'R";
-
-        for c in flatten(parser::parse(s).unwrap().1).into_iter() {
-            move_seq.push_back(c)
-        }
+    if keyboard_input.just_pressed(KeyCode::U) {
+        move_seq.push_back(Move::U(MoveVariant::Standard));
     }
 
-    if keyboard_input.just_pressed(KeyCode::S) {
-        let s = "U2F2L2FUDF2U2R'U'D2RF2UL2U'L2UF2U2R2UU2L2F2D2L2B2D2L2F2U2R2";
+    if keyboard_input.just_pressed(KeyCode::D) {
+        move_seq.push_back(Move::D(MoveVariant::Standard));
+    }
 
-        for c in flatten(parser::parse(s).unwrap().1).into_iter() {
-            move_seq.push_back(c)
-        }
+    if keyboard_input.just_pressed(KeyCode::L) {
+        move_seq.push_back(Move::L(MoveVariant::Standard));
+    }
+
+    if keyboard_input.just_pressed(KeyCode::R) {
+        move_seq.push_back(Move::R(MoveVariant::Standard));
+    }
+
+    if keyboard_input.just_pressed(KeyCode::F) {
+        move_seq.push_back(Move::F(MoveVariant::Standard));
+    }
+
+    if keyboard_input.just_pressed(KeyCode::B) {
+        move_seq.push_back(Move::B(MoveVariant::Standard));
     }
 }
 
