@@ -30,6 +30,7 @@ pub use {
     component::{DynComponent, GenericComponent},
     components::*,
     element::GenericElement,
+    elements::{IntoEventHandler, IntoReactive, Reactive},
     node::{render_to, render_to_body, DomNode, EventHandler, GenericNode, NodeType},
     reactive::{create_root, untrack, Effect, Scope, ScopeDisposer, Signal},
     view::View,

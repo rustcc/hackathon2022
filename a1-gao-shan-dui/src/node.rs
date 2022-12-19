@@ -87,7 +87,9 @@ pub enum NodeType {
     Text(StaticStr),
     /// 占位符，通常被动态组件用来确定挂载的位置。
     Placeholder(StaticStr),
-    /// 模板节点，对模板节点内容的修改不应该影响实际呈现的视图，通常是 [`DocumentFragment`]。
+    /// 模板节点，对模板节点内容的修改不应该影响实际呈现的视图，且模板应该作为作为
+    /// 一个片段被插入到节点树中的任意位置，即插入模板的全部子结点而不是模板节点本
+    /// 身。对于 [`DomNode`]，通常是 [`DocumentFragment`]。
     ///
     /// [`DocumentFragment`]: web_sys::DocumentFragment
     Template(StaticStr),

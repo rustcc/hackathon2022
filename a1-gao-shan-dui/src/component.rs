@@ -20,7 +20,7 @@ pub trait GenericComponent<N: GenericNode>: 'static + Sized {
         self.into_dyn_component().render()
     }
 
-    /// 初始化模板并将渲染的视图附加到 `parent`。
+    /// 初始化模板，并在渲染阶段执行前将模板附加到 `parent`。
     fn render_to(self, parent: &N) {
         untrack(|| self.into_dyn_component().render_to(parent));
     }
@@ -41,6 +41,16 @@ impl<N: GenericNode> GenericComponent<N> for DynComponent<N> {
     }
 
     fn render(self) -> View<N> {
+        self.render_impl(|_| {})
+    }
+
+    fn render_to(self, parent: &N) {
+        self.render_impl(|container| parent.append_child(container));
+    }
+}
+
+impl<N: GenericNode> DynComponent<N> {
+    fn render_impl(self, after_init: impl FnOnce(&N)) -> View<N> {
         let Self {
             template: Template { id, init, render },
         } = self;
@@ -59,14 +69,12 @@ impl<N: GenericNode> GenericComponent<N> for DynComponent<N> {
                 init_template()
             }
         };
+        let first_child = container.first_child();
+        after_init(&container);
         // 2) 渲染阶段
-        let RenderOutput { view, next } = render(container.first_child());
+        let RenderOutput { view, next } = render(first_child);
         // next 应该指向最后一个子结点的下一个节点，即 None
         debug_assert!(next.is_none());
         view
-    }
-
-    fn render_to(self, parent: &N) {
-        self.render().append_to(parent);
     }
 }
