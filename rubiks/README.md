@@ -1,5 +1,9 @@
 # Rubik's cube Simulator and Solver
 
+
+https://user-images.githubusercontent.com/217027/208389491-66023580-3cce-4abf-9b32-879a5db7ee34.mp4
+
+
 ## Feature list
 
 - [x] 显示魔方
