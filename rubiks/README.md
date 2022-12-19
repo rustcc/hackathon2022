@@ -1,14 +1,4 @@
-# Rubik's cube
-
-## TODO list
-
-- [x] 显示魔方
-- [ ] 旋转魔方
-  - [ ] 按键旋转
-- [ ] 练习模式
-- [ ] 计时模式
-- [x] wasm
-- [ ] 3x3结算
+# Rubik's cube Simulator and Solver
 
 ## 如何使用
 ### 原生平台

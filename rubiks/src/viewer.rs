@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
-use std::time::Instant;
 
 use bevy::prelude::*;
+use bevy::utils::Instant;
 use bevy_mod_picking::{PickableBundle, PickingEvent};
 use bevy_mod_raycast::{Intersection, RaycastMesh};
 
