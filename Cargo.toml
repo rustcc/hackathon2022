@@ -1,0 +1,13 @@
+[package]
+name = "baog"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+iced = "0.6.0"
+iced_native = "0.7.0"
+toml = "0.5.10"
+image = "0.24.5"
+native-dialog = "0.6.3"
+sudo = "0.6.0"
+dirs = "4.0"
