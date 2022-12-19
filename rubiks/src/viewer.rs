@@ -593,7 +593,7 @@ pub fn mouse_dragging(
                 panic!("Can not get start pos");
             }
 
-            info!("MouseDraggingRecorder started {:?}", recorder);
+            debug!("MouseDraggingRecorder started {:?}", recorder);
         }
     }
 

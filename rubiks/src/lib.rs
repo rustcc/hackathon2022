@@ -1,10 +1,10 @@
+use bevy::app::{App, Plugin};
+
 use crate::camera::CameraPlugin;
 use crate::viewer::ViewerPlugin;
-use bevy::app::{App, Plugin};
 
 pub mod camera;
 pub mod core;
-pub mod parser;
 pub mod viewer;
 
 /// 魔方插件

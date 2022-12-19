@@ -12,12 +12,12 @@ use bevy_mod_picking::DefaultPickingPlugins;
 use bevy_mod_raycast::DefaultRaycastingPlugin;
 use winit::window::Icon;
 
-use bevy_rubikscube::core::{flatten, MyRaycastSet};
+use bevy_rubikscube::core::MyRaycastSet;
 use bevy_rubikscube::viewer::{
     CreateCube, CubeSettings, MoveSequence, PlayMode, RandomPuzzle, SolvePuzzle, TimekeepingTimer,
 };
-use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
-use rubiks_solver::Cube;
+use bevy_rubikscube::BevyRubiksCubePlugin;
+use rubiks_solver::{parse_scramble, Cube};
 
 fn main() {
     let log = if cfg!(feature = "dev") {
@@ -99,7 +99,7 @@ fn dashboard_ui(
                 ] {
                     for c in l {
                         if ui.button(c).clicked() {
-                            for c in flatten(parser::parse(c).unwrap().1).into_iter() {
+                            for c in parse_scramble(c.to_string()) {
                                 move_seq.push_back(c)
                             }
                         }
