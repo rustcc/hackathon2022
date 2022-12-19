@@ -1,13 +1,16 @@
-use crate::core::{BaseMove, Command, MyRaycastSet, Piece, Surface};
+use std::collections::VecDeque;
+use std::f32::consts::{FRAC_PI_2, PI};
+use std::time::Instant;
+
 use bevy::prelude::*;
 use bevy_mod_picking::PickableBundle;
 use bevy_mod_raycast::RaycastMesh;
 
 use rubiks_solver::prelude::ORDERED_FACES;
 use rubiks_solver::{rand_moves, solve, Cube, Face, FaceletCube, Move, MoveVariant};
-use std::collections::VecDeque;
-use std::f32::consts::{FRAC_PI_2, PI};
-use std::time::Instant;
+
+use crate::core::{flatten, BaseMove, Command, MyRaycastSet, Piece, Surface};
+use crate::parser;
 
 /// 显示的模块的尺寸
 const BOX_SIZE: f32 = 1.0;
@@ -35,6 +38,7 @@ impl Plugin for ViewerPlugin {
             .add_system(move_piece)
             .add_system(random_puzzle)
             .add_system(solve_puzzle)
+            .add_system(keyboard_input_system)
             // .add_system(mouse_dragging)
             .add_system_to_stage(CoreStage::PostUpdate, update_surface);
     }
@@ -306,15 +310,16 @@ fn move_piece(
             executing_cmd.command = command;
             executing_cmd.left_angle = command.angle();
             cube_settings.cube = cube_settings.cube.apply_move(command);
-            let quat =
-                Quat::from_axis_angle(executing_cmd.command.axis(), executing_cmd.left_angle);
-
-            for (mut transform, piece) in q_pieces.iter_mut() {
-                if piece.is_selected(&executing_cmd.command) {
-                    transform.rotate_around(Vec3::ZERO, quat);
-                }
-            }
-            executing_cmd.left_angle = 0.0;
+            // let quat =
+            //     Quat::from_axis_angle(executing_cmd.command.axis(), executing_cmd.left_angle);
+            //
+            // for (mut transform, piece) in q_pieces.iter_mut() {
+            //     if piece.is_selected(&executing_cmd.command) {
+            //         transform.rotate_around(Vec3::ZERO, quat);
+            //     }
+            // }
+            // executing_cmd.left_angle = 0.0;
+            update_ev.send(UpdateSurface);
             info!("执行指令: {}", command);
         }
     } else {
@@ -379,7 +384,7 @@ fn update_surface(
             piece.x = ((transform.translation.x + border).round() / BOX_SIZE) as u8;
             piece.y = ((transform.translation.y + border).round() / BOX_SIZE) as u8;
             piece.z = ((transform.translation.z + border).round() / BOX_SIZE) as u8;
-            info!("{border} y from {} to {}", transform.translation.y, piece.y);
+            // info!("{border} y from {} to {}", transform.translation.y, piece.y);
         }
     }
 }
@@ -479,6 +484,24 @@ fn solve_puzzle(
                     move_seq.push_back(command);
                 }
             }
+        }
+    }
+}
+
+fn keyboard_input_system(keyboard_input: Res<Input<KeyCode>>, mut move_seq: ResMut<MoveSequence>) {
+    if keyboard_input.just_pressed(KeyCode::Q) {
+        let s = "R'B2LU'L2B'L2D2B'R";
+
+        for c in flatten(parser::parse(s).unwrap().1).into_iter() {
+            move_seq.push_back(c)
+        }
+    }
+
+    if keyboard_input.just_pressed(KeyCode::S) {
+        let s = "U2F2L2FUDF2U2R'U'D2RF2UL2U'L2UF2U2R2UU2L2F2D2L2B2D2L2F2U2R2";
+
+        for c in flatten(parser::parse(s).unwrap().1).into_iter() {
+            move_seq.push_back(c)
         }
     }
 }

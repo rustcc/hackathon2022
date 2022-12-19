@@ -1,27 +1,23 @@
 // 在发布模式下 windows系统，关闭命令行窗口
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::io::Cursor;
+use std::time::Instant;
+
 use bevy::prelude::*;
 use bevy::window::WindowId;
 use bevy::winit::WinitWindows;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
-use bevy_inspector_egui::prelude::*;
-use bevy_mod_picking::{
-    DebugCursorPickingPlugin, DebugEventsPickingPlugin, DefaultPickingPlugins, PickableBundle,
-    PickingCameraBundle,
-};
-use bevy_mod_raycast::{
-    DefaultRaycastingPlugin, Intersection, RaycastMesh, RaycastMethod, RaycastSource, RaycastSystem,
-};
+use bevy_mod_picking::DefaultPickingPlugins;
+use bevy_mod_raycast::DefaultRaycastingPlugin;
+use winit::window::Icon;
+
 use bevy_rubikscube::core::{flatten, MyRaycastSet};
 use bevy_rubikscube::viewer::{
     CreateCube, CubeSettings, MoveSequence, PlayMode, RandomPuzzle, SolvePuzzle, TimekeepingTimer,
 };
 use bevy_rubikscube::{parser, BevyRubiksCubePlugin};
 use rubiks_solver::Cube;
-use std::io::Cursor;
-use std::time::Instant;
-use winit::window::Icon;
 
 fn main() {
     let mut app = App::new();
@@ -35,7 +31,6 @@ fn main() {
     }))
     .add_plugin(EguiPlugin)
     .add_plugin(BevyRubiksCubePlugin)
-    // .add_plugin(WorldInspectorPlugin::new())
     .add_plugins(DefaultPickingPlugins)
     // .add_plugin(DebugCursorPickingPlugin)
     // .add_plugin(DebugEventsPickingPlugin)
