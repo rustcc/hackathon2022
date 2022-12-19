@@ -466,7 +466,7 @@ fn generate_command(
             } else if piece_translation.x.round() == 0.0 {
                 return Move::M(rotate);
             } else {
-                return Move::R(rotate);
+                return Move::R(rotate.inverse());
             }
         }
     } else {
@@ -521,7 +521,7 @@ fn solve_puzzle(
         let solution = solve(&cube_setting.cube);
         if let Some(s) = solution {
             if cube_setting.cube.apply_moves(&s).is_solved() {
-                println!("solved");
+                info!("solved in {} step", s.len());
                 for command in s {
                     move_seq.push_back(command);
                 }

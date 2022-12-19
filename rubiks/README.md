@@ -28,3 +28,9 @@ cargo run
 需要安装trunk `cargo install --locked trunk`
 
 然后运行 `trunk serve`, 打开http://127.0.0.1:8080
+
+## References
+
+- https://ruwix.com/
+- https://worldcubeassociation.org/regulations/#article-12-notation
+- https://www.jaapsch.net/puzzles/thistle.htm
