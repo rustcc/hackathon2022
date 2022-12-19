@@ -43,7 +43,7 @@ impl Cube for GeoCube {
         let mut faces = Vec::new();
 
         for mvs in FACE_ROTATING_MOVES.iter() {
-            let rotated_cube = self.apply_moves(&mvs);
+            let rotated_cube = self.apply_moves(mvs);
             let top_layer_stickers = rotated_cube.top_layer_stickers();
 
             for (sticker, _) in top_layer_stickers {
@@ -112,7 +112,7 @@ impl GeoCube {
         let cube = Self { size, stickers };
 
         for (idx, mvs) in (FACE_ROTATING_MOVES).iter().enumerate() {
-            let rotated_cube = cube.apply_moves(&mvs);
+            let rotated_cube = cube.apply_moves(mvs);
             let top_layer_stickers = rotated_cube.top_layer_stickers();
 
             for (sticker, _) in top_layer_stickers.iter() {
@@ -126,8 +126,8 @@ impl GeoCube {
     fn top_layer_stickers(&self) -> Vec<(Sticker, CubeSize)> {
         let mut top_layer_stickers = self
             .stickers
-            .to_owned()
-            .into_iter()
+            .iter()
+            .copied()
             .filter(|(s, _)| matches!(s.current_face(), Face::U))
             .collect::<Vec<_>>();
 

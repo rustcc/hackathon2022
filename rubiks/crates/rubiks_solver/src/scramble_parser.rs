@@ -4,11 +4,7 @@ use crate::generic_cube::{CubeSize, Move, MoveVariant};
 
 /// 将WCA的旋转命令改为通用的旋转命令
 pub fn parse_scramble(scramble: String) -> Vec<Move> {
-    scramble
-        .trim()
-        .split_whitespace()
-        .map(convert_move)
-        .collect()
+    scramble.split_whitespace().map(convert_move).collect()
 }
 
 fn convert_move(mv: &str) -> Move {

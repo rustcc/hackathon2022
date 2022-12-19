@@ -20,11 +20,11 @@ use bevy_rubikscube::BevyRubiksCubePlugin;
 use rubiks_solver::{parse_scramble, Cube};
 
 fn main() {
-    let log = if cfg!(feature = "dev") {
+    // 只有在dev模式下，才打开DEBUG日志
+    let log_plugin = if cfg!(feature = "dev") {
         bevy::log::LogPlugin {
             level: bevy::log::Level::DEBUG,
             filter: "wgpu=warn,bevy_ecs=info".to_string(),
-            ..default()
         }
     } else {
         bevy::log::LogPlugin::default()
@@ -41,7 +41,7 @@ fn main() {
                 },
                 ..default()
             })
-            .set(log),
+            .set(log_plugin),
     )
     .add_plugin(EguiPlugin)
     .add_plugin(BevyRubiksCubePlugin)
@@ -155,13 +155,12 @@ fn dashboard_ui(
                     rand_ev.send(RandomPuzzle);
                 }
 
-                if cube_settings.cube.size() == 3 {
-                    if ui
+                if cube_settings.cube.size() == 3
+                    && ui
                         .add_sized([100.0, 30.0], egui::Button::new("Solver"))
                         .clicked()
-                    {
-                        solve_ev.send(SolvePuzzle);
-                    }
+                {
+                    solve_ev.send(SolvePuzzle);
                 }
 
                 if ui

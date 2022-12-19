@@ -44,12 +44,7 @@ fn convert_move(size: CubeSize, mv: Move) -> FaceletMove {
             .apply_move(mv)
             .stickers()
             .iter()
-            .map(|s| {
-                (
-                    index_map[(&s.initial)] as u16,
-                    index_map[(&s.current)] as u16,
-                )
-            })
+            .map(|s| (index_map[(&s.initial)], index_map[(&s.current)]))
             .filter(|x| x.0 != x.1)
             .collect(),
     )

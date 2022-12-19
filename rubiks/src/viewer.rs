@@ -156,6 +156,7 @@ pub enum PlayMode {
 pub struct TimekeepingTimer(pub Instant);
 
 /// 先清除之前的魔方， 再生成新的魔方
+#[allow(clippy::too_many_arguments)]
 fn create_cube_event(
     mut commands: Commands,
     mut create_ev: EventReader<CreateCube>,
@@ -332,12 +333,10 @@ fn move_piece(
                 new_left_angle = 0.0;
                 update_ev.send(UpdateSurface);
             }
-        } else {
-            if new_left_angle > 0.0 {
-                angle = left_angle;
-                new_left_angle = 0.0;
-                update_ev.send(UpdateSurface);
-            }
+        } else if new_left_angle > 0.0 {
+            angle = left_angle;
+            new_left_angle = 0.0;
+            update_ev.send(UpdateSurface);
         }
 
         let quat = Quat::from_axis_angle(executing_cmd.command.axis(), angle);
@@ -407,7 +406,7 @@ fn generate_command(
                 MoveVariant::Standard
             };
             if piece_translation.z.round() == -1.0 {
-                return Move::B(rotate.inverse());
+                Move::B(rotate.inverse())
             } else if piece_translation.z.round() == 0.0 {
                 return Move::S(rotate);
             } else {
@@ -422,15 +421,13 @@ fn generate_command(
                 } else {
                     MoveVariant::Inverse
                 }
+            } else if delta_z > 0.0 {
+                MoveVariant::Inverse
             } else {
-                if delta_z > 0.0 {
-                    MoveVariant::Inverse
-                } else {
-                    MoveVariant::Standard
-                }
+                MoveVariant::Standard
             };
             if piece_translation.y.round() == -1.0 {
-                return Move::D(rotate);
+                Move::D(rotate)
             } else if piece_translation.y.round() == 0.0 {
                 return Move::E(rotate);
             } else {
@@ -484,12 +481,10 @@ fn generate_command(
                 } else {
                     MoveVariant::Standard
                 }
+            } else if delta_x > 0.0 {
+                MoveVariant::Standard
             } else {
-                if delta_x > 0.0 {
-                    MoveVariant::Standard
-                } else {
-                    MoveVariant::Inverse
-                }
+                MoveVariant::Inverse
             };
             if piece_translation.y.round() == -1.0 {
                 return Move::D(rotate);
@@ -573,10 +568,7 @@ pub fn mouse_dragging(
         // recorder开始记录
         if let Some(event) = picking_events
             .iter()
-            .filter(|e| match e {
-                PickingEvent::Clicked(_) => true,
-                _ => false,
-            })
+            .filter(|e| matches!(e, PickingEvent::Clicked(_)))
             .last()
         {
             let piece_entity = match event {
@@ -585,10 +577,10 @@ pub fn mouse_dragging(
                     unreachable!();
                 }
             };
-            recorder.piece = Some(piece_entity.clone());
+            recorder.piece = Some(*piece_entity);
 
             if let Some(intersection) = q_intersection.iter().last() {
-                recorder.start_pos = Some(intersection.position().unwrap().clone());
+                recorder.start_pos = Some(*intersection.position().unwrap());
             } else {
                 panic!("Can not get start pos");
             }
@@ -597,34 +589,33 @@ pub fn mouse_dragging(
         }
     }
 
-    if mouse.pressed(MouseButton::Left) {
-        if recorder.start_pos.is_some() && recorder.piece.is_some() {
-            if let Some(intersection) = q_intersection.iter().last() {
-                if let Some(inter_pos) = intersection.position() {
-                    // 鼠标拽动距离超过临界值
-                    if recorder.start_pos.unwrap().distance(*inter_pos) > 0.5 {
-                        // 触发旋转
-                        // info!(
-                        //     "Trigger side move event, end_pos: {:?}",
-                        //     &intersection.position()
-                        // );
-                        let (transform, piece) = q_pieces.get(recorder.piece.unwrap()).unwrap();
-                        let command = generate_command(
-                            piece,
-                            transform.translation,
-                            recorder.start_pos.unwrap(),
-                            intersection.position().unwrap().clone(),
-                        );
+    if mouse.pressed(MouseButton::Left) && recorder.start_pos.is_some() && recorder.piece.is_some()
+    {
+        if let Some(intersection) = q_intersection.iter().last() {
+            if let Some(inter_pos) = intersection.position() {
+                // 鼠标拽动距离超过临界值
+                if recorder.start_pos.unwrap().distance(*inter_pos) > 0.5 {
+                    // 触发旋转
+                    // info!(
+                    //     "Trigger side move event, end_pos: {:?}",
+                    //     &intersection.position()
+                    // );
+                    let (transform, piece) = q_pieces.get(recorder.piece.unwrap()).unwrap();
+                    let command = generate_command(
+                        piece,
+                        transform.translation,
+                        recorder.start_pos.unwrap(),
+                        *intersection.position().unwrap(),
+                    );
 
-                        move_seq.0.push_back(command);
+                    move_seq.0.push_back(command);
 
-                        // 清除recorder
-                        recorder.clear();
-                    }
+                    // 清除recorder
+                    recorder.clear();
                 }
-            } else {
-                panic!("Can not get end pos");
             }
+        } else {
+            panic!("Can not get end pos");
         }
     }
 

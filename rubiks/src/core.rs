@@ -57,32 +57,6 @@ impl Piece {
         }
     }
 
-    pub fn is_corner(&self) -> bool {
-        self.x == 0 && self.y == 0 && self.z == 0
-            || self.x == 0 && self.y == 0 && self.z == self.size - 1
-            || self.x == 0 && self.y == self.size - 1 && self.z == 0
-            || self.x == 0 && self.y == self.size - 1 && self.z == self.size - 1
-            || self.x == self.size - 1 && self.y == 0 && self.z == 0
-            || self.x == self.size - 1 && self.y == 0 && self.z == self.size - 1
-            || self.x == self.size - 1 && self.y == self.size - 1 && self.z == 0
-            || self.x == self.size - 1 && self.y == self.size - 1 && self.z == self.size - 1
-    }
-
-    pub fn is_edge(&self) -> bool {
-        self.x == 0 && self.y == 0
-            || self.x == 0 && self.z == 0
-            || self.y == 0 && self.z == 0
-            || self.x == 0 && self.y == self.size - 1
-            || self.x == 0 && self.z == self.size - 1
-            || self.y == 0 && self.z == self.size - 1
-            || self.x == self.size - 1 && self.y == 0
-            || self.x == self.size - 1 && self.z == 0
-            || self.y == self.size - 1 && self.z == 0
-            || self.x == self.size - 1 && self.y == self.size - 1
-            || self.x == self.size - 1 && self.z == self.size - 1
-            || self.y == self.size - 1 && self.z == self.size - 1
-    }
-
     pub fn is_up(&self) -> bool {
         self.y == self.size - 1
     }

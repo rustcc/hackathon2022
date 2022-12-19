@@ -15,12 +15,12 @@ impl Cube for FaceletCube {
         Self {
             size,
             faces: vec![
-                repeat(U, (size * size).into()),
-                repeat(R, (size * size).into()),
-                repeat(F, (size * size).into()),
-                repeat(D, (size * size).into()),
-                repeat(L, (size * size).into()),
-                repeat(B, (size * size).into()),
+                repeat(U, size * size),
+                repeat(R, size * size),
+                repeat(F, size * size),
+                repeat(D, size * size),
+                repeat(L, size * size),
+                repeat(B, size * size),
             ]
             .concat()
             .iter()
