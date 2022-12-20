@@ -332,6 +332,30 @@ impl EffectId {
     }
 }
 
+/// 一个特殊的 [`Signal`]，在读取计算新值并缓存。
+pub struct Lazy<T: 'static> {
+    value: Signal<Option<T>>,
+    updater: Effect,
+}
+
+impl<T> Clone for Lazy<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T> Copy for Lazy<T> {}
+
+impl<T> Lazy<T> {
+    pub fn get(&self) -> T
+    where
+        T: Clone,
+    {
+        self.updater.run();
+        self.value.get().unwrap()
+    }
+}
+
 /// 调用 `op`，其中所有的操作，例如 [`Signal::get`]，均不会被所在的 [`Effect`] 追踪。
 pub fn untrack<U>(op: impl FnOnce() -> U) -> U {
     RT.with(|rt| {
@@ -376,6 +400,12 @@ impl Scope {
 
     /// 创建一个 [`Effect`].
     pub fn create_effect(&self, f: impl 'static + FnMut()) {
+        // 第一次执行来追踪最初的依赖关系。
+        self.create_effect_no_run(f).run();
+    }
+
+    /// 创建一个 [`Effect`]，且不执行第一次计算。
+    pub fn create_effect_no_run(&self, f: impl 'static + FnMut()) -> Effect {
         let id = RT.with(|rt| {
             let id = rt.effects.borrow_mut().insert(Rc::new(RefCell::new(f)));
             rt.effect_contexts
@@ -384,8 +414,7 @@ impl Scope {
             id
         });
         self.id.on_cleanup(Cleanup::Effect(id));
-        // 第一次执行来追踪最初的依赖关系。
-        id.try_run().unwrap();
+        Effect { id }
     }
 
     /// 创建一个 [`Effect`]，每次都在一个子 [`Scope`] 中运行。
@@ -395,7 +424,7 @@ impl Scope {
         self.create_effect(move || {
             drop(prev_disposer.take());
             prev_disposer = Some(cx.create_child(&mut f).1);
-        })
+        });
     }
 
     /// 创建一个 [`Signal`]，其跟踪 `f` 的返回值，每当其返回新值时，该 [`Signal`]
@@ -417,6 +446,25 @@ impl Scope {
         });
         // memo 应该随 Effect 执行而有了初值
         memo.get().unwrap()
+    }
+
+    /// 创建一个 [`Lazy`]，与 [`create_memo`] 类似，不过它仅在被读取时计算新值。
+    ///
+    /// [`create_memo`]: Scope::create_memo
+    pub fn create_lazy<T, U>(
+        &self,
+        input: impl 'static + FnMut() -> T,
+        mut compute: impl 'static + FnMut(T) -> U,
+    ) -> Lazy<U>
+    where
+        T: 'static + Clone,
+    {
+        let input = self.create_memo(input);
+        let value = self.create_signal(None);
+        let updater = self.create_effect_no_run(move || {
+            untrack(|| value.set(Some(compute(input.get()))));
+        });
+        Lazy { value, updater }
     }
 }
 
@@ -445,6 +493,28 @@ mod tests {
             state.update(|x| *x + 1);
             assert_eq!(state.get(), 2);
             assert_eq!(double.get(), 4);
+        });
+    }
+
+    #[test]
+    fn lazy() {
+        create_root(|cx| {
+            let state = cx.create_signal(1);
+            let counter = Rc::new(Cell::new(0));
+            let double = cx.create_lazy(move || state.get(), {
+                let counter = counter.clone();
+                move |i| {
+                    counter.set(counter.get() + 1);
+                    i * 2
+                }
+            });
+            assert_eq!(counter.get(), 0);
+            assert_eq!(double.get(), 2);
+            assert_eq!(counter.get(), 1);
+            state.set(2);
+            assert_eq!(counter.get(), 1);
+            assert_eq!(double.get(), 4);
+            assert_eq!(counter.get(), 2);
         });
     }
 
