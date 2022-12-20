@@ -17,11 +17,14 @@ mod view;
 
 pub mod components {
     mod element;
+    #[path = "for.rs"]
+    mod for_;
     mod fragment;
     mod list;
     mod show;
 
     pub use element::Element;
+    pub use for_::For;
     pub use fragment::Fragment;
     pub use list::List;
     pub use show::{Else, If, Show};

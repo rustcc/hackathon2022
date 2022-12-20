@@ -5,12 +5,10 @@ use crate::{
 
 define_placeholder!(Placeholder("空 `akun::List` 的占位符"));
 
-type ReactiveList<T> = Reactive<Vec<T>>;
-
 /// 动态更新的列表。
 pub struct List<N, T: 'static> {
     cx: Scope,
-    each: Option<ReactiveList<T>>,
+    each: Option<Reactive<Vec<T>>>,
     children: Option<Box<dyn Fn(&T, usize) -> View<N>>>,
 }
 
@@ -87,6 +85,7 @@ where
                         }
                         mounted_view.set(View::fragment(mounted_fragment.clone()))
                     }
+                    debug_assert!(parent.child_mounted_correctly(&mounted_view.get()));
                 });
             });
             View::from(mounted_view)
@@ -101,7 +100,10 @@ where
         self
     }
 
-    pub fn child<C: GenericComponent<N>>(mut self, child: impl 'static + Fn(&T, usize) -> C) -> Self {
+    pub fn child<C: GenericComponent<N>>(
+        mut self,
+        child: impl 'static + Fn(&T, usize) -> C,
+    ) -> Self {
         if self.children.is_some() {
             panic!("`List` 有且只能有一个 `child`");
         }

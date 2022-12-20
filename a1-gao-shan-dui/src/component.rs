@@ -8,6 +8,8 @@ pub trait GenericComponent<N: GenericNode>: 'static + Sized {
     /// 构建模板，每次构建都应该返回相同的结果。
     fn build_template(self) -> Template<N>;
 
+    // TODO: lazy initialize ID
+
     /// 将当前组件及其 ID 打包成 [`DynComponent`]。
     fn into_dyn_component(self) -> DynComponent<N> {
         DynComponent {
@@ -75,6 +77,7 @@ impl<N: GenericNode> DynComponent<N> {
         let RenderOutput { view, next } = render(first_child.unwrap());
         // next 应该指向最后一个子结点的下一个节点，即 None
         debug_assert!(next.is_none());
+        // TODO: 渲染后从模板节点移除
         view
     }
 }

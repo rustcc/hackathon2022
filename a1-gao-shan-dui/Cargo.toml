@@ -9,8 +9,8 @@ authors = ["loichyan <loichyan@foxmail.com>"]
 edition = "2021"
 
 [dependencies]
-slotmap = "1.0"
 js-sys = "0.3"
+slotmap = "1.0"
 wasm-bindgen = "0.2"
 
 [dependencies.web-sys]
