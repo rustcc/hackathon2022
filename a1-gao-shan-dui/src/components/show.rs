@@ -1,5 +1,5 @@
 use crate::{
-    untrack, view, view::ViewParentExt, DynComponent, GenericComponent, GenericElement,
+    untrack, utils::ViewParentExt, view, DynComponent, GenericComponent, GenericElement,
     GenericNode, IntoReactive, Reactive, Scope, Value, View,
 };
 

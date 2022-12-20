@@ -73,10 +73,14 @@ impl ScopeId {
                             rt.signal_contexts.borrow_mut().remove(id).unwrap();
                         }
                         Cleanup::Effect(id) => {
-                            let raw = rt.effects.borrow_mut().remove(id).unwrap();
-                            if Rc::strong_count(&raw) != 1 {
-                                panic!("试图释放一个正在运行中的 Effect");
-                            }
+                            rt.effects
+                                .borrow_mut()
+                                .remove(id)
+                                .unwrap()
+                                // 即罕见的情况下，可以在一个 Effect 内释放其所在的作用域，
+                                // 这是不被允许的
+                                .try_borrow_mut()
+                                .unwrap_or_else(|_| panic!("试图释放一个正在运行中的 Effect"));
                             rt.effect_contexts.borrow_mut().remove(id).unwrap();
                         }
                     }
