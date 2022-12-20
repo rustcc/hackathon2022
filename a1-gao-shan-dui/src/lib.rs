@@ -33,7 +33,7 @@ pub mod template;
 pub use {
     component::{DynComponent, GenericComponent},
     components::*,
-    element::GenericElement,
+    element::{GenericElement, NodeRef},
     elements::{IntoEventHandler, IntoReactive, Reactive, Reactive::Value},
     node::{mount_to, mount_to_body, DomNode, EventHandler, GenericNode, NodeType, Property},
     reactive::{create_root, untrack, Effect, Scope, ScopeDisposer, Signal},
@@ -41,7 +41,17 @@ pub use {
     web_sys::Event,
 };
 
+use std::borrow::Borrow;
+
 /// 创建一个元素组件 [`struct@Element`]。
 pub fn view<N: GenericNode>(cx: Scope) -> Element<N> {
     Element(cx)
 }
+
+pub trait ScopeExt: Borrow<Scope> {
+    fn create_node_ref<N: GenericNode>(&self) -> NodeRef<N> {
+        NodeRef::new(*self.borrow())
+    }
+}
+
+impl<T: Borrow<Scope>> ScopeExt for T {}

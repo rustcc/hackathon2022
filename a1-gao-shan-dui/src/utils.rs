@@ -2,6 +2,7 @@ use crate::{GenericNode, View};
 
 macro_rules! define_placeholder {
     ($vis:vis $name:ident($data:expr)) => {
+        #[derive(Clone)]
         $vis struct $name<N> {
             node: N,
         }

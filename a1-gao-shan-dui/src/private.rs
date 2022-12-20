@@ -6,7 +6,7 @@ use crate::{
 
 pub fn view_element<N, E>(
     cx: Scope,
-    _marker: fn(Scope) -> E,
+    create: fn(Scope) -> E,
     props: impl 'static + FnOnce(E) -> E,
     children: impl 'static + FnOnce(Element<N>) -> Element<N>,
 ) -> Element<N>
@@ -14,6 +14,7 @@ where
     N: GenericNode,
     E: GenericElement<N>,
 {
+    let _ = create;
     let element = Element(cx).root(props);
     children(element)
 }

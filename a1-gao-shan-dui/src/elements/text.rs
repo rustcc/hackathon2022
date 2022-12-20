@@ -3,6 +3,7 @@ use crate::{GenericElement, GenericNode, NodeType, Property, Scope};
 
 /// 文本节点。
 #[allow(non_camel_case_types)]
+#[derive(Clone)]
 pub struct text<N> {
     cx: Scope,
     node: N,

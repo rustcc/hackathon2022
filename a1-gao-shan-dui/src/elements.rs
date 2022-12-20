@@ -161,6 +161,7 @@ macro_rules! define_elements {
     ($($tag:ident),*$(,)?) => {$(
         #[doc = concat!("`", stringify!($tag), "` HMTL 元素。")]
         #[allow(non_camel_case_types)]
+        #[derive(Clone)]
         pub struct $tag<N> {
             cx: Scope,
             node: N,

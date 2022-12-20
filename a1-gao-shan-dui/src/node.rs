@@ -129,6 +129,12 @@ impl From<web_sys::Node> for DomNode {
     }
 }
 
+impl From<DomNode> for web_sys::Node {
+    fn from(value: DomNode) -> Self {
+        value.node
+    }
+}
+
 impl GenericNode for DomNode {
     fn global_templates() -> GlobalTemplates<Self> {
         DOM_TEMPLATES.with(Clone::clone)
@@ -254,6 +260,16 @@ impl GenericNode for DomNode {
     }
 }
 
+impl DomNode {
+    pub fn from_web_sys(node: web_sys::Node) -> Self {
+        Self::from(node)
+    }
+
+    pub fn into_web_sys(self) -> web_sys::Node {
+        self.node
+    }
+}
+
 /// 将组件挂载到 `document.body` 上。
 pub fn mount_to_body<C>(f: impl FnOnce(Scope) -> C)
 where
@@ -268,7 +284,7 @@ where
     C: GenericComponent<DomNode>,
 {
     let (_, disposer) = create_root(|cx| {
-        f(cx).mount_to(&DomNode::from(root.clone()));
+        f(cx).mount_to(&DomNode::from_web_sys(root.clone()));
     });
     std::mem::forget(disposer);
 }

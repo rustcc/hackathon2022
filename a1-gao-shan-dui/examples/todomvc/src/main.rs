@@ -1,10 +1,14 @@
-use akun::{view, GenericComponent, GenericNode, If, List, Scope, Show, Signal};
-use wasm_bindgen::JsCast;
+use akun::{
+    view, DomNode, Event, GenericComponent, GenericElement, GenericNode, If, List, Scope, ScopeExt,
+    Show, Signal,
+};
+use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{HtmlInputElement, KeyboardEvent};
 
 #[derive(Clone)]
 struct Todo {
-    content: String,
+    content: Signal<String>,
+    editing: Signal<bool>,
     completed: Signal<bool>,
     removed: Signal<bool>,
 }
@@ -21,9 +25,12 @@ fn make_todo<N: GenericNode>(
     show_mode: Signal<ShowMode>,
     todo: &Todo,
 ) -> impl GenericComponent<N> {
-    let completed = todo.completed;
-    let removed = todo.removed;
-    let content = todo.content.clone();
+    let Todo {
+        content,
+        editing,
+        completed,
+        removed,
+    } = todo.clone();
     let toggle = move |_| completed.update(|x| !*x);
     let remove = move |_| removed.set(true);
     let show = move || {
@@ -37,13 +44,41 @@ fn make_todo<N: GenericNode>(
             }
         }
     };
+    let edit_input = cx.create_node_ref::<N>();
+    let set_editing = move |_| {
+        editing.set(true);
+        if let Some(input) = edit_input.get::<DomNode>() {
+            input
+                .into_web_sys()
+                .unchecked_into::<HtmlInputElement>()
+                .focus()
+                .unwrap_throw();
+        }
+    };
+    let save_editing = move |ev: Event| {
+        if editing.get() {
+            let input = ev
+                .current_target()
+                .unwrap()
+                .unchecked_into::<HtmlInputElement>();
+            content.set(input.value());
+            editing.set(false);
+        }
+    };
+    let done_editing = move |ev: Event| {
+        let ev = ev.unchecked_into::<web_sys::KeyboardEvent>();
+        if ev.key() == "Enter" {
+            save_editing(ev.into());
+        }
+    };
     view! { cx,
         li {
             .class("todo")
             .toggle_class("completed", completed)
+            .toggle_class("editing", editing)
             *Show { *If {
                 .when(show)
-                div {
+                [div {
                     .class("view")
                     input {
                         .class("toggle")
@@ -51,10 +86,19 @@ fn make_todo<N: GenericNode>(
                         :checked(completed)
                         @input(toggle)
                     }
-                    label { (content) }
+                    label { @dblclick(set_editing) (content) }
                     button { .class("destroy") @click(remove) }
-                    // TODO: 添加 edit 功能
                 }
+                *Show { *If {
+                    .when(editing)
+                    input {
+                        .class("edit")
+                        .ref_(edit_input)
+                        :value(content)
+                        @blur(save_editing)
+                        @keypress(done_editing)
+                    }
+                } }]
             } }
         }
     }
@@ -67,12 +111,16 @@ fn main() {
         let todos = cx.create_signal(vec![]);
         let show_mode = cx.create_signal(ShowMode::All);
 
-        let add_todo = move |ev: akun::Event| {
+        let add_todo = move |ev: Event| {
             let ev = ev.unchecked_into::<KeyboardEvent>();
             if ev.key() == "Enter" {
-                let input = ev.target().unwrap().unchecked_into::<HtmlInputElement>();
+                let input = ev
+                    .current_target()
+                    .unwrap()
+                    .unchecked_into::<HtmlInputElement>();
                 let todo = Todo {
-                    content: input.value().trim().to_owned(),
+                    content: cx.create_signal(input.value().trim().to_owned()),
+                    editing: cx.create_signal(false),
                     completed: cx.create_signal(false),
                     removed: cx.create_signal(false),
                 };
@@ -80,13 +128,13 @@ fn main() {
             }
         };
         let make_todo = move |todo: &Todo| make_todo(cx, show_mode, todo);
-        let remaining_count = move || {
+        let remaining_count = cx.create_memo(move || {
             todos
                 .get()
                 .iter()
                 .filter(|todo| !todo.removed.get())
                 .count()
-        };
+        });
         let filter_selected = move |mode: ShowMode| move || show_mode.get() == mode;
         let filter_set = move |mode: ShowMode| move |_: akun::Event| show_mode.set(mode);
         let clear_complted = move |_| {
@@ -106,7 +154,7 @@ fn main() {
                     input {
                         .class("new-todo")
                         :placeholder("What needs to be done?")
-                        @keydown(add_todo)
+                        @keypress(add_todo)
                     }
                 }
                 *Show { *If {
@@ -123,7 +171,9 @@ fn main() {
                     .class("footer")
                     span {
                         .class("todo-count")
-                        strong { (remaining_count) } " item(s) left"
+                        strong { (remaining_count) } " item"
+                        (cx.create_memo(move || if remaining_count.get() > 1 { "s" } else { "" }))
+                        " left"
                     }
                     ul {
                         .class("filters")
@@ -144,7 +194,7 @@ fn main() {
                         } }
                     }
                     *Show { *If {
-                        .when(move || remaining_count() > 0)
+                        .when(move || remaining_count.get() > 0)
                         button {
                             .class("clear-completed")
                             @click(clear_complted)
