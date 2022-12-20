@@ -52,7 +52,7 @@ fn main() {
                 *Show {
                     *If {
                         .when(show)
-                        *List { .each(counters) {move |&init| make_counter(cx, init)} }
+                        *List { .each(counters) {move |&init, _| make_counter(cx, init)} }
                     }
                 }
             }

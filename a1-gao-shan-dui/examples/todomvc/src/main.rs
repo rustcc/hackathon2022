@@ -127,7 +127,7 @@ fn main() {
                 todos.update(|todos| todos.iter().cloned().chain(Some(todo)).collect())
             }
         };
-        let make_todo = move |todo: &Todo| make_todo(cx, show_mode, todo);
+        let make_todo = move |todo: &Todo, _| make_todo(cx, show_mode, todo);
         let remaining_count = cx.create_memo(move || {
             todos
                 .get()

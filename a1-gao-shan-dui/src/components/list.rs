@@ -11,7 +11,7 @@ type ReactiveList<T> = Reactive<Vec<T>>;
 pub struct List<N, T: 'static> {
     cx: Scope,
     each: Option<ReactiveList<T>>,
-    children: Option<Box<dyn Fn(&T) -> View<N>>>,
+    children: Option<Box<dyn Fn(&T, usize) -> View<N>>>,
 }
 
 /// 创建一个 [`struct@List`] 组件。
@@ -61,7 +61,7 @@ where
                     for val in each.iter() {
                         // 将新增的视图挂载到当前视图之后。
                         if new_len >= mounted_len {
-                            let new_view = fn_view(val);
+                            let new_view = fn_view(val, new_len);
                             parent.insert_before(&new_view, next_sibling.as_ref());
                             mounted_fragment.push(new_view);
                         }
@@ -101,11 +101,11 @@ where
         self
     }
 
-    pub fn child<C: GenericComponent<N>>(mut self, child: impl 'static + Fn(&T) -> C) -> Self {
+    pub fn child<C: GenericComponent<N>>(mut self, child: impl 'static + Fn(&T, usize) -> C) -> Self {
         if self.children.is_some() {
             panic!("`List` 有且只能有一个 `child`");
         }
-        self.children = Some(Box::new(move |t| child(t).render()));
+        self.children = Some(Box::new(move |t, i| child(t, i).render()));
         self
     }
 }
