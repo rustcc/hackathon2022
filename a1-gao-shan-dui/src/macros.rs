@@ -284,8 +284,10 @@ macro_rules! id {
 #[macro_export]
 macro_rules! view {
     ($cx:expr, $($args:tt)*) => {{
+        fn __id() -> $crate::template::TemplateId {
+            $crate::id!()
+        }
         let __cx = $cx;
-        let __id = $crate::id!();
         $crate::__view_internal! {
             cx=[__cx]
             prefix=[*]

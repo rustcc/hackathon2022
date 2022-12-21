@@ -48,7 +48,7 @@ pub trait ViewParentExt<'a, N: GenericNode>: Into<Option<&'a N>> {
     }
 
     /// 遍历全部节点，检查是否与 `first` 及其之后的兄弟节点顺序一致。
-    fn child_mounted_correctly(self, view: &View<N>) -> bool {
+    fn check_children(self, view: &View<N>) -> bool {
         let mut equal = true;
         if self.into().is_some() {
             let mut current = Some(view.first());

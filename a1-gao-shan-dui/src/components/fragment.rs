@@ -17,7 +17,6 @@ impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
     fn build_template(self) -> Template<N> {
         let Self { init, render } = self;
         Template {
-            id: None,
             init: Box::new(move || {
                 let mut views = Views::default();
                 init(&mut views);

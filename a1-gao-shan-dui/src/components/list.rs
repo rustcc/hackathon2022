@@ -85,7 +85,7 @@ where
                         }
                         mounted_view.set(View::fragment(mounted_fragment.clone()))
                     }
-                    debug_assert!(parent.child_mounted_correctly(&mounted_view.get()));
+                    debug_assert!(parent.check_children(&mounted_view.get()));
                 });
             });
             View::from(mounted_view)

@@ -114,7 +114,7 @@ where
                     }
                     // 更新视图
                     mounted_fragment = new_fragment;
-                    debug_assert!(parent.child_mounted_correctly(&new_view));
+                    debug_assert!(parent.check_children(&new_view));
                     mounted_view.set(new_view);
                 });
             });

@@ -26,7 +26,6 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
         } = self;
         let (init, render) = init_and_render_root.expect("`Element` 没有指定 `root`");
         Template {
-            id: None,
             init: Box::new(|| {
                 let root = init();
                 init_children(&root);

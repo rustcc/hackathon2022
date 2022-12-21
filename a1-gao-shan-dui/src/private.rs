@@ -41,7 +41,7 @@ where
 }
 
 pub struct ViewRoot<N> {
-    id: Option<TemplateId>,
+    id: Option<fn() -> TemplateId>,
     children: Option<DynComponent<N>>,
 }
 
@@ -54,18 +54,14 @@ pub fn ViewRoot<N: GenericNode>(_: Scope) -> ViewRoot<N> {
 }
 
 impl<N: GenericNode> GenericComponent<N> for ViewRoot<N> {
+    fn id(&self) -> Option<TemplateId> {
+        Some(self.id.expect("`view!` 没有指定 ID")())
+    }
+
     fn build_template(self) -> Template<N> {
-        if self.id.is_none() {
-            panic!("`view!` 没有指定 ID");
-        }
-        let template = self
-            .children
+        self.children
             .expect("`view!` 没有指定根组件")
-            .build_template();
-        Template {
-            id: self.id,
-            ..template
-        }
+            .build_template()
     }
 }
 
@@ -74,7 +70,7 @@ impl<N: GenericNode> ViewRoot<N> {
         self
     }
 
-    pub fn id(mut self, id: TemplateId) -> Self {
+    pub fn id(mut self, id: fn() -> TemplateId) -> Self {
         if self.id.is_some() {
             panic!("`view!` 有且只能有一个 ID")
         }

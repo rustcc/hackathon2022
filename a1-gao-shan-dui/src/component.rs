@@ -1,5 +1,5 @@
 use crate::{
-    template::{GlobalTemplates, RenderOutput, Template, TemplateContent},
+    template::{GlobalTemplates, RenderOutput, Template, TemplateContent, TemplateId},
     untrack, GenericNode, NodeType, View,
 };
 
@@ -8,11 +8,14 @@ pub trait GenericComponent<N: GenericNode>: 'static + Sized {
     /// 构建模板，每次构建都应该返回相同的结果。
     fn build_template(self) -> Template<N>;
 
-    // TODO: lazy initialize ID
+    fn id(&self) -> Option<TemplateId> {
+        None
+    }
 
     /// 将当前组件及其 ID 打包成 [`DynComponent`]。
     fn into_dyn_component(self) -> DynComponent<N> {
         DynComponent {
+            id: self.id(),
             template: self.build_template(),
         }
     }
@@ -30,10 +33,16 @@ pub trait GenericComponent<N: GenericNode>: 'static + Sized {
 
 /// 将某个组件打包成 [`DynComponent`]。
 pub struct DynComponent<N> {
+    /// 用于标识该模板的唯一 ID。
+    id: Option<TemplateId>,
     template: Template<N>,
 }
 
 impl<N: GenericNode> GenericComponent<N> for DynComponent<N> {
+    fn id(&self) -> Option<TemplateId> {
+        self.id
+    }
+
     fn build_template(self) -> Template<N> {
         self.template
     }
@@ -54,7 +63,8 @@ impl<N: GenericNode> GenericComponent<N> for DynComponent<N> {
 impl<N: GenericNode> DynComponent<N> {
     fn render_impl(self, after_init: impl FnOnce(&N)) -> View<N> {
         let Self {
-            template: Template { id, init, render },
+            id,
+            template: Template { init, render },
         } = self;
         // 1) 初始化阶段
         let TemplateContent { container } = {
