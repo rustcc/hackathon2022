@@ -1,11 +1,9 @@
-use crate::{create_root, template::GlobalTemplates, GenericComponent, Scope};
+use crate::{create_root, template::GlobalTemplates, GenericComponent, Scope, DOCUMENT};
 use js_sys::Reflect;
-use wasm_bindgen::{prelude::*, JsCast, JsValue};
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlTemplateElement;
 
 thread_local! {
-    static WINDOW: web_sys::Window = web_sys::window().unwrap();
-    static DOCUMENT: web_sys::Document = WINDOW.with(web_sys::Window::document).unwrap();
     static BODY: web_sys::HtmlElement = DOCUMENT.with(web_sys::Document::body).unwrap();
     static DOM_TEMPLATES: GlobalTemplates<DomNode> = GlobalTemplates::default();
 }
@@ -217,14 +215,7 @@ impl GenericNode for DomNode {
     }
 
     fn listen_event(&self, event: &str, handler: EventHandler) {
-        self.node
-            .add_event_listener_with_callback(
-                event,
-                &Closure::wrap(handler.handler)
-                    .into_js_value()
-                    .unchecked_into(),
-            )
-            .unwrap_throw_val();
+        crate::event_delegation::add_event_listener(&self.node, event.to_owned().into(), handler);
     }
 
     fn parent(&self) -> Option<Self> {

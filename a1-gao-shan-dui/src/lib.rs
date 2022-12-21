@@ -11,6 +11,7 @@ mod macros;
 mod utils;
 mod component;
 mod element;
+mod event_delegation;
 mod node;
 mod reactive;
 mod view;
@@ -45,6 +46,11 @@ pub use {
 };
 
 use std::borrow::Borrow;
+
+thread_local! {
+    static WINDOW: web_sys::Window = web_sys::window().unwrap();
+    static DOCUMENT: web_sys::Document = WINDOW.with(web_sys::Window::document).unwrap();
+}
 
 /// 创建一个元素组件 [`struct@Element`]。
 pub fn view<N: GenericNode>(cx: Scope) -> Element<N> {

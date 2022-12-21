@@ -95,8 +95,8 @@ fn make_todo<N: GenericNode>(
                         .class("edit")
                         .ref_(edit_input)
                         :value(content)
-                        @blur(save_editing)
-                        @keypress(done_editing)
+                        @focusout(save_editing)
+                        @keydown(done_editing)
                     }
                 } }]
             } }
@@ -124,7 +124,7 @@ fn main() {
                     completed: cx.create_signal(false),
                     removed: cx.create_signal(false),
                 };
-                todos.update(|todos| todos.iter().cloned().chain(Some(todo)).collect())
+                todos.update(|todos| todos.iter().cloned().chain(Some(todo)).collect());
             }
         };
         let make_todo = move |todo: &Todo, _| make_todo(cx, show_mode, todo);
@@ -154,7 +154,7 @@ fn main() {
                     input {
                         .class("new-todo")
                         :placeholder("What needs to be done?")
-                        @keypress(add_todo)
+                        @keydown(add_todo)
                     }
                 }
                 *Show { *If {
