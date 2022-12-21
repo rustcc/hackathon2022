@@ -1,0 +1,7 @@
+#N 4hearts.rle
+#C https://conwaylife.com/wiki/Heart
+#C https://www.conwaylife.com/patterns/4hearts.rle
+x = 15, y = 15, rule = B3/S23
+5bo3bo$3bo2bobo2bo$3bo2bobo2bo$b2obobobobob2o$3bo2bobo2bo$o5bobo5bo$b
+5o3b5o2$b5o3b5o$o5bobo5bo$3bo2bobo2bo$b2obobobobob2o$3bo2bobo2bo$3bo2b
+obo2bo$5bo3bo!

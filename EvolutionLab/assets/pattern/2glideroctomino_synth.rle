@@ -1,0 +1,5 @@
+#N 2glideroctomino_synth.rle
+#C https://conwaylife.com/wiki/List_of_common_evolutionary_sequences
+#C https://www.conwaylife.com/patterns/2glideroctomino_synth.rle
+x = 46, y = 13, rule = B3/S23
+11bo$11bobo19bo$11b2o21b2o$33b2o$43bo$43bobo$43b2o4$3o$2bo40b2o$bo41b2o!

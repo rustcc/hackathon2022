@@ -1,0 +1,5 @@
+#N 2ttetrominoes.rle
+#C https://conwaylife.com/wiki/Boat-tie
+#C https://www.conwaylife.com/patterns/2ttetrominoes.rle
+x = 8, y = 7, rule = B3/S23
+bo$3o4$6bo$5b3o!

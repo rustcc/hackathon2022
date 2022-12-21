@@ -1,0 +1,5 @@
+#N 9blocks.rle
+#C https://conwaylife.com/wiki/Density
+#C https://www.conwaylife.com/patterns/9blocks.rle
+x = 8, y = 8, rule = B3/S23
+2ob2ob2o$2ob2ob2o2$2ob2ob2o$2ob2ob2o2$2ob2ob2o$2ob2ob2o!

@@ -1,0 +1,5 @@
+#N 4eaters.rle
+#C https://conwaylife.com/wiki/Composers
+#C https://www.conwaylife.com/patterns/4eaters.rle
+x = 15, y = 15, rule = B3/S23
+3bo7bo$b3o7b3o$o13bo$2o11b2o8$2o11b2o$o13bo$b3o7b3o$3bo7bo!

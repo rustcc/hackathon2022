@@ -1,0 +1,2 @@
+2022-12-18 15:21:33 [INFO] [demo_app] [webapp/demo-app/src/main.rs:48] [inner] http://172.31.123.10:9001/static/resources/dist/index.html
+2022-12-18 15:21:34 [INFO] [demo_app] [webapp/demo-app/src/main.rs:53] [public] http://8.212.22.167:9001/static/resources/dist/index.html

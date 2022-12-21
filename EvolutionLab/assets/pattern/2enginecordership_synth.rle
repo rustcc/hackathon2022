@@ -1,0 +1,9 @@
+#N 2enginecordership_synth
+#O AbhpzTa
+#C 9-glider synthesis of the 2-engine Cordership
+#C https://conwaylife.com/wiki/2-engine_Cordership
+#C https://conwaylife.com/forums/viewtopic.php?p=54453#p54453
+x = 175, y = 167, rule = B3/S23
+37bo$38b2o134bo$37b2o133b2o$173b2o16$71bobo$72b2o$72bo$165bo$163b2o$
+164b2o14$65bo$66b2o$65b2o2$144bobo$144b2o$145bo75$166b3o$166bo$167bo4$
+147b2o$147bobo$147bo37$bo$b2o$obo!

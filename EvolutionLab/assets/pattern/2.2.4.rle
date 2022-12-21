@@ -1,0 +1,5 @@
+#N 2.2.4.rle
+#C https://conwaylife.com/wiki/2.2.4
+#C https://www.conwaylife.com/patterns/2.2.4.rle
+x = 9, y = 6, rule = B3/S23
+3bobo$bo2bo2bo$obobobobo$o3bo3bo$b2obob2o$4bo!

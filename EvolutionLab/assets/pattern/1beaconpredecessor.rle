@@ -1,0 +1,5 @@
+#N 1beaconpredecessor.rle
+#C https://conwaylife.com/wiki/Beacon_variants
+#C https://www.conwaylife.com/patterns/1beaconpredecessor.rle
+x = 15, y = 12, rule = B3/S23
+10b3o$10bobo$10bobo$4bo$4bo9bo$4bo9bo$14bo$3o3b3o2$4bo$4bo$4bo!

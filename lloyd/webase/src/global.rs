@@ -1,0 +1,1 @@
+pub const RESOURCES_DIR_NAME: &str = "resources";

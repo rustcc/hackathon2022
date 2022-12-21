@@ -1,0 +1,9 @@
+# Env
+.direnv
+
+# Rust
+/target
+/Cargo.lock
+
+# Bundle files
+dist

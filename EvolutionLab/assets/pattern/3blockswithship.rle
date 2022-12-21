@@ -1,0 +1,5 @@
+#N 3blockswithship.rle
+#C https://conwaylife.com/wiki/Density
+#C https://www.conwaylife.com/patterns/3blockswithship.rle
+x = 6, y = 6, rule = B3/S23
+2ob2o$2ob2o2$2ob2o$2obobo$4b2o!

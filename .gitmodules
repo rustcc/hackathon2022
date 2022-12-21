@@ -1,0 +1,3 @@
+[submodule "pindash"]
+	path = pindash
+	url = https://github.com/pindash-io/News.git

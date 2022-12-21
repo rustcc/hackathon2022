@@ -1,0 +1,6 @@
+#N 4iheptominomimics.rle
+#C https://conwaylife.com/wiki/I-heptomino
+#C https://www.conwaylife.com/patterns/4iheptominomimics.rle
+x = 25, y = 21, rule = B3/S23
+5bo16bo$5bo15bo$4bo15bo$3bo15bo$3bo15bo$2bo15bo13$b3o17b3o$o3bo15bo3bo
+$2o2bo15b2obo!

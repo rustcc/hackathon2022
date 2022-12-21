@@ -1,0 +1,10 @@
+#N 6x6maxdensitystilllifes.rle
+#C https://conwaylife.com/wiki/Density
+#C https://www.conwaylife.com/patterns/6x6maxdensitystilllifes.rle
+x = 36, y = 26, rule = B3/S23
+2ob2o10b2o2b2o9b2ob2o$2ob2o10b2o2b2o9b2obobo$33bobo$2ob2o14b2o9b3obo$
+2obobo9b2obobo9bo2bo$4b2o9b2ob2o11b2o5$2o2b2o11bob2o9b2ob2o$o2bobo11b
+2obo9b2obo$b2o12b2o16bo$3b2o11bob2o10b2ob2o$obo2bo9bo2bobo9bobo2bo$2o
+2b2o9b2o2b2o10bo2b2o5$2bo2bo10b2ob2o10b2ob2o$2b4o10b2obo10bob2obo$2o
+17bo10bo$bo2b2o10b3o12bob2o$bobobo9bo2bobo9b2obobo$2ob2o10b2o2b2o13b2o
+!

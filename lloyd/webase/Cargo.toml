@@ -1,0 +1,49 @@
+[package]
+name = "webase"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+procmac = { workspace = true }
+tools = { workspace = true }
+common = { workspace = true }
+ulid = { workspace = true }
+chrono = { workspace = true }
+log = { workspace = true }
+log4rs = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+structopt = { workspace = true }
+toml = { workspace = true }
+regex = { workspace = true }
+once_cell = { workspace = true }
+futures = { workspace = true }
+async_once = { workspace = true }
+async-trait = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tokio-util = { workspace = true }
+bytes = { workspace = true }
+mime = { workspace = true }
+http = { workspace = true }
+tower = { workspace = true, features = [
+    "util",
+    "timeout",
+    "limit",
+    "load-shed",
+    "steer",
+    "filter",
+] }
+tower-layer = { workspace = true }
+tower-service = { workspace = true }
+tower-http = { workspace = true, features = ["full"] }
+hyper = { workspace = true, features = ["full"] }
+axum = { workspace = true, features = ["headers", "http2", "multipart", "ws"] }
+reqwest = { workspace = true, features = ["json"] }
+pnet_datalink = { workspace = true }

@@ -1,0 +1,22 @@
+import { useBlockNative } from '~/composables/onboard/useBlockNative'
+
+import type { UserModule } from '~/types'
+
+// { app, router, routes, isClient, initialState }
+export const install: UserModule = async({ isClient, app }) => {
+  if (!isClient)
+    return
+
+  const web3 = useBlockNative()
+  web3.doInitOnboard()
+  web3.doInitNotify()
+  // sub wallets change event
+  // const walletsSub = onboard.state.select('wallets')
+  // const { unsubscribe } = walletsSub.subscribe((_wallets) => {
+  //   wallets = _wallets
+  // })
+  // const success = await onboard.setChain({ chainId: '0x89' })
+
+  app.provide('web3', web3)
+  web3.autoConnect()
+}

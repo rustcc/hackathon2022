@@ -1,0 +1,7 @@
+#N 2eatersplusloaf.rle
+#C https://conwaylife.com/wiki/Eater_3
+#C https://www.conwaylife.com/patterns/2eatersplusloaf.rle
+x = 20, y = 20, rule = B3/S23
+11bo$10bobo$11bo2$9b5o$9bo4bo$12bo2bo$12b2obo2bo$9b2o4bobobo$4b2o2bo2b
+o3bo2bo$bo2bo4bobo2b2o$obobo5bo$bo2bob2o$4bob2o$5bo4bo$6b5o2$8bo$7bobo
+$8bo!

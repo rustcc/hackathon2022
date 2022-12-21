@@ -1,0 +1,13 @@
+#N 4-engine Cordership synth
+#O Dave Greene
+#C 14-glider recipe for 4-engine Cordership, minimum population 134
+#C Completed 21 April 2017, following Luka Okanishi's discovery
+#C   of a three-glider switch engine synthesis
+#C 14-glider synthesis of a minimum population 4-engine Cordership.
+#C https://conwaylife.com/wiki/4-engine_Cordership
+#C https://conwaylife.com/patterns/4enginecordership_synth.rle
+x = 131, y = 131, rule = B3/S23
+39bo$40b2o$39b2o$77bo$77bobo$77b2o18$33bo$34bo$32b3o$71bo$69b2o$70b2o
+4$25bo$23bobo$24b2o3$80b3o$80bo$obo78bo$b2o$bo18$74bo$73b2o$73bobo8$
+27bo101bo$27b2o99b2o$26bobo99bobo2$60b2o$59b2o$61bo2$3b3o$5bo$4bo$37b
+2o$37bobo$37bo46$70b2o$69b2o$71bo!

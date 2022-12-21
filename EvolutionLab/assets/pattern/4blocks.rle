@@ -1,0 +1,5 @@
+#N 4blocks.rle
+#C https://conwaylife.com/wiki/Density
+#C https://www.conwaylife.com/patterns/4blocks.rle
+x = 5, y = 5, rule = B3/S23
+2ob2o$2ob2o2$2ob2o$2ob2o!
