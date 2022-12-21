@@ -35,7 +35,10 @@ impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
                     let placeholder = next.unwrap();
                     RenderOutput {
                         next: placeholder.next_sibling(),
-                        view: View::node(placeholder),
+                        view: {
+                            before_rendering.apply_to(&placeholder);
+                            View::node(placeholder)
+                        },
                     }
                 } else {
                     RenderOutput {

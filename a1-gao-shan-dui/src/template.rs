@@ -35,6 +35,17 @@ pub enum BeforeRendering<'a, N> {
     Nothing,
 }
 
+impl<N: GenericNode> BeforeRendering<'_, N> {
+    pub fn apply_to(&self, node: &N) {
+        use BeforeRendering::*;
+        match self {
+            AppendTo(parent) => parent.append_child(node),
+            RemoveFrom(parent) => parent.remove_child(node),
+            Nothing => {}
+        }
+    }
+}
+
 impl<N> Clone for BeforeRendering<'_, N> {
     fn clone(&self) -> Self {
         *self

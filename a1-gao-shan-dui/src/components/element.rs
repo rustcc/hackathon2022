@@ -32,14 +32,12 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
                 View::node(root)
             }),
             render: Box::new(|before_rendering, root| {
-                match before_rendering {
-                    BeforeRendering::AppendTo(parent) => parent.append_child(&root),
-                    BeforeRendering::RemoveFrom(parent) => parent.remove_child(&root),
-                    BeforeRendering::Nothing => {}
-                }
                 let first_child = root.first_child();
                 let next = root.next_sibling();
-                let view = render(root);
+                let view = {
+                    before_rendering.apply_to(&root);
+                    render(root)
+                };
                 let last_child = render_children(first_child);
                 debug_assert!(last_child.is_none());
                 RenderOutput { next, view }
