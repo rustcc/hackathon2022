@@ -1,0 +1,38 @@
+[package]
+name = "bevy_rubikscube"
+version = "0.1.0"
+authors = ["ZoOL <zhooul@gmail.com>", "lewiszlw <lewiszlw520@gmail.com>"]
+license = "MIT OR Apache-2.0"
+edition = "2021"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[workspace]
+members = ["crates/rubiks_solver"]
+
+[features]
+dev = ["bevy-inspector-egui"]
+
+[dependencies]
+bevy = "0.9"
+bevy_mod_picking = "0.11.0"
+bevy_mod_raycast = "0.7.0"
+bevy_egui = "0.18.0"
+bevy-inspector-egui = { version = "0.15.0", optional = true }
+
+
+rubiks_solver = { path = "crates/rubiks_solver" }
+
+winit = { version = "0.27", default-features = false }
+image = { version = "0.24", default-features = false }
+
+[build-dependencies]
+embed-resource = "1.4"
