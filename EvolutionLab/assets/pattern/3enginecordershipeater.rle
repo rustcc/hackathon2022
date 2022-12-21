@@ -1,0 +1,13 @@
+#N 3-engine Cordership eater
+#O Jason Summers
+#C An eater for the 3-engine Cordership
+#C www.conwaylife.com/wiki/index.php?title=3-engine_Cordership
+x = 87, y = 95, rule = B3/S23
+46b2o$25bo20b2o$25b3o$28bo$27b2o4$54b2o$54b2o15$18bo$18b3o$21bo$20b2o
+3$60b3o$61bo$61bo2bo$b2o58bo2bo$2bo59bobo$2bobo72b2o$3b2o72b2o3$61bo$
+60bobo$61bo$78bo$77bo7b2o$59b4o22b2o$59b2o3bo10bo$60bo4bo9bobo$62bob2o
+10bo$63bo3$71bobob2o$54bo16bobo$53b3o17bo2bo$2o70bo3bo$2o51b3o16b4o2b
+2o$54b2ob2o14bo5b2o$56bo21bo3$30b3o$31bo$8b2o21bo2bo$8b2o21bo2bo$32bo
+bo$47b2o$47b2o$53bo$52b3o$31bo19b2ob2o$30bobo18bobo$31bo19bo3$29b4o$29b
+2o3bo13bo$30bo4bo11bobo$32bob2o11bo$33bo15b2o$50bo$47b3o$48b2o$45bo$45b
+2o$45b2o$35b2o6b2o$35b2o4b2o$41b2obo$43b2o5$43b2o$43b2o!

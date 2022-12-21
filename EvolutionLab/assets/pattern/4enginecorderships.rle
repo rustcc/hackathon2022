@@ -1,0 +1,37 @@
+#N 4enginecorderships.rle
+#O Michael Simkin, 5 November 2014
+#C extensible 4-engine Cordership
+#C https://www.conwaylife.com/forums/viewtopic.php?p=14135#p14135
+#C https://conwaylife.com/wiki/4-engine_Cordership
+#C https://www.conwaylife.com/patterns/4enginecorderships.rle
+x = 302, y = 137, rule = B3/S23
+28bo$27bobo$26b2ob2o$3b3o20b2ob2o123bo$2bo3bo18b3o125bobo$bo4bo18b3o3b
+o12b2o106b2ob2o$o3bo20b3o4bo11b2o83b3o20b2ob2o$o2bob3o18b2o5bo94bo3bo
+18b3o$o7bo17b3o98bo4bo18b3o3bo12b2o$2bo3bobo18b2o97bo3bo20b3o4bo11b2o$
+2bo3bob2o18b2o96bo2bob3o18b2o5bo$4b3ob2o33b2o81bo7bo17b3o$20b2o106bo3b
+obo18b2o$20b2o6bo14b3o6b2o74bo3bob2o18b2o$27b3o13bobo6b2o76b3ob2o33b2o
+$26bo3bo115b2o$4b2o24b2o13bo100b2o6bo14b3o6b2o$4b2o23b2o13b2o107b3o13b
+obo6b2o$5bo38b2o106bo3bo$130b2o24b2o13bo$5bo22b2o13b2o85b2o23b2o13b2o$
+28b2o13b3o85bo38b2o$41b3o$3bo5b3o21b3o5bo89bo22b2o13b2o$3bo7bo142b2o
+13b3o$3bo5bobo10b2o16b3o124b3o$9b2o10bo2bo15bo88bo5b3o21b3o5bo$20bo3bo
+15b3o86bo7bo$22b2o35b2o68bo5bobo10b2o16b3o$59b2o74b2o10bo2bo15bo$16bo
+129bo3bo15b3o$14b2o132b2o35b2o$8b2o2b2o5bo165b2o$8b2o4b2o126bo$18bo
+121b2o$15b4o115b2o2b2o5bo$14bobo50b2o65b2o4b2o$13bo2b2obo47b2o75bo$14b
+o4bo121b4o$15bo124bobo50b2o$16bo2bo119bo2b2obo47b2o$16b2o122bo4bo$141b
+o$142bo2bo$75b2o65b2o$75b2o2$201b2o$201b2o4$83b2o$83b2o2$209b2o$209b2o
+4$91b2o$91b2o2$217b2o$217b2o2$268bo$267bobo$99b2o165bo3bo$99b2o166bobo
+$268bo14b3o$225b2o55bo3bo$225b2o41b4o10b3o2bo$267bo4bo9bo3bo$269bo13b
+3o$266bo3bo2bo9b2o7b2o$107b2o157bob3obo19b2o$107b2o158b3obo2$233b2o$
+233b2o50bo$282b5o$281bo$297bo$115b2o165bo3bo9bob2o$115b2o166b3o12b3o$
+289b2o4b3o3bo$241b2o29b2o14bo2bo4b5o$241b2o29b2o13bo5bo5bo$286bo2b2o$
+285b2ob2ob3o$114b3o142b3o15b2o6bo2bo$113bo3bo5b2o133bo17b4o5bob2o$112b
+o4bo5b2o132bo4b2o11bo4bo5b2o$111bo3bo140bo3bo9bobobo2bo2b2o$111bo2bob
+3o130b2o5bo2bo4bo4bo2bobo4b2o$111bo7bo129b2o5bo3bo3bo3bo4bo3b3o$113bo
+3bobo137b2obob3o4bo4b2obo$113bo3bob2o139bo11bo$115b3ob2o140b4o6b2o$
+263b2o$88bo6b2o185b3o$87bobo3bo3bo$86bo3bobo3b2o18bo140b2o$87bobo2bobo
+b2o17bobo139b2o$88bo3bo2b2o17bo$92bo4bo21bo$93bo2bo10b2o5b2o2b2o$95bo
+11b2o7bo$114b2obo$113bo3bo$112bo$111b2obob2o$111b2o3bo$112bo2b2o$113b
+3o$102bo11bo$91b3o7bo2bo16bo$90bobob2o5bo3bo15bo$90bobob2o5bo3bo15bo$
+90bo3bo5b2o3bo4b3o$91bobo7bo2bo4b2o2bo$92bo15bo3b2o$107bo2b3o$106bo2b
+2o$106bo2bo$107bo2bo$95b2o13bo$95b2o11bobo2$106bo$104bob2o$103bo2b2o$
+104b2obo$104b2ob2o$105bobo$106bo!

@@ -1,0 +1,9 @@
+#N 3-engine Cordership_synth
+#O Luka Okanishi and Dave Greene, 13 March 2017
+#C 11-glider synthesis of Paul Tooke's 3-engine Cordership
+#C www.conwaylife.com/wiki/index.php?title=3-engine_Cordership
+#C https://www.conwaylife.com/patterns/3enginecordership_synth.rle
+x = 94, y = 102, rule = B3/S23
+9bobo$10b2o$10bo30bo$40bo$40b3o19$4bo$2bobo$3b2o$33bobo$33b2o$34bo$44b
+2o$44bobo$44bo10$o$b2o$2o5$3b2o$2bobo$4bo2$5b3o29b2o$5bo30b2o$6bo31bo
+8$92b2o$91b2o$93bo35$39bo$38b2o$38bobo!

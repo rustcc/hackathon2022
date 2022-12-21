@@ -1,0 +1,9 @@
+#N 2merzenichsp31hassling2rpentominoes.rle
+#C https://conwaylife.com/wiki/Merzenich%27s_p31
+#C https://www.conwaylife.com/patterns/2merzenichsp31hassling2rpentominoes.rle
+x = 55, y = 26, rule = B3/S23
+2b2o7b2o$2b2o7b2o$42b2o7b2o$42b2o7b2o3$2bo9bo$2obo7bob2o$2ob2o5b2ob2o
+27bo9bo$3b2o5b2o28b2obo7bob2o$bobo7bobo26b2ob2o5b2ob2o$2bo9bo12bo17b2o
+5b2o$2bo9bo10b3o4bo10bobo7bobo$bobo7bobo10bo4b3o10bo9bo$3b2o5b2o17bo
+12bo9bo$2ob2o5b2ob2o26bobo7bobo$2obo7bob2o28b2o5b2o$2bo9bo27b2ob2o5b2o
+b2o$40b2obo7bob2o$42bo9bo3$2b2o7b2o$2b2o7b2o$42b2o7b2o$42b2o7b2o!

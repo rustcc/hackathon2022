@@ -1,0 +1,7 @@
+#N 8and9cellswitchenginepredecessors.rle
+#C https://conwaylife.com/wiki/Switch_engine
+#C https://www.conwaylife.com/patterns/8and9cellswitchenginepredecessors.rle
+x = 47, y = 68, rule = B3/S23
+3o$obo$3o$obo$3o16$3o18bo18b2o$bo2bo16bo2bo17bo$5bo14bobobo17bo$2bobo
+38b4o$24b2o16$3o$obo$3o$2bo$2bo16$2o18bo21bo$20b2o18bo$bo39bo$2b2obobo
+13b3o17bo$24bo$4bobo15b2o16bob3o2$43bo!

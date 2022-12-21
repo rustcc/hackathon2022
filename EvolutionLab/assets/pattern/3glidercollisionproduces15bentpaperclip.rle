@@ -1,0 +1,5 @@
+#N 3glidercollisionproduces15bentpaperclip.rle
+#C https://conwaylife.com/wiki/15-bent-paperclip
+#C https://www.conwaylife.com/patterns/3glidercollisionproduces15bentpaperclip.rle
+x = 35, y = 19, rule = B3/S23
+2bo$2o$b2o3$4b3o$4bo$5bo9$33bo$32b2o$32bobo!

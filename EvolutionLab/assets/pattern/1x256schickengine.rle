@@ -1,0 +1,5 @@
+#N 1x256schickengine.rle
+#C https://conwaylife.com/wiki/One-cell-thick_pattern
+#C https://www.conwaylife.com/patterns/1x256schickengine.rle
+x = 63, y = 1, rule = B3/S23
+5ob4o2b3o2b5ob4ob4o26b5o!

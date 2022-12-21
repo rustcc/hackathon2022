@@ -1,0 +1,10 @@
+#N 4enginecordership136.rle
+#C https://conwaylife.com/wiki/4-engine_Cordership
+#C https://www.conwaylife.com/patterns/4enginecordership136.rle
+x = 77, y = 74, rule = B3/S23
+48bo$48bo7bo$48bo5b3o$47b2o3bobo$53bo2bo$52bo2b2o$67b2o$67b2o7$75b2o$
+75b2o$56b2o3b2o$50bo3b4o3bobo$50bob2o2bo2bo3bo$50bob2o4bo3b2o$54bo3bo$
+59bo3$40b3o6bo$41b2o3b2obo$40b2o5bobo$45b3obo$48b2o9$27bo$24b4o4$27bob
+o$28bo$2o2bo21b2o$3bobo20bo2bo$2bo16bo5b2ob2o$19bo$4b2o13bo2$5b2o12b2o
+$4bo13bo2bo$2b2ob2o11bobo$5b2o10b2o$3bo13bo$20b2o$20b2o$20b2o$17b2obo$
+18b3o$19bo4$7b2o$7b2o7$15b2o$15b2o!

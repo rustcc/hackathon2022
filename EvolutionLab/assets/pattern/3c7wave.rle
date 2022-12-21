@@ -1,0 +1,10 @@
+#N 3c/7 wave
+#O Stephen Silver
+#C https://conwaylife.com/wiki/3c/7_wave
+#C https://conwaylife.com/patterns/3c7wave.rle
+x = 63, y = 9, rule = B3/S23
+3bo7bo7bo7bo$2b3o5b3o5b3o5b3o$bo2b2o3b2o2bo3bo2b2o3b2o2bo5bo7bo7bo7bo$
+2o2b2o3b2o2b2ob2o2b2o3b2o2b2o3b3o5b3o5b3o5b3o$2o2b3ob3o2b2ob2o2b3ob3o
+2b2o2bo2b2o3b2o2bo3bo2b2o3b2o2bo$3o9b3ob3o9b3ob2o2b2o3b2o2b2ob2o2b2o3b
+2o2b2o$b2o9b2o3b2o9b2o2b2o2b3ob3o2b2ob2o2b3ob3o2b2o$32b3o9b3ob3o9b3o$
+33b2o9b2o3b2o9b2o!

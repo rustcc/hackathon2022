@@ -1,0 +1,11 @@
+#N 4inarowcordership_synth.rle
+#C https://conwaylife.com/wiki/4-in-a-row_Cordership
+#C https://www.conwaylife.com/patterns/4inarowcordership_synth.rle
+#C Ian07, 9 September 2020
+#C 4-in-a-row Cordership synthesis in 14 gliders
+#C https://www.conwaylife.com/forums/viewtopic.php?p=103728#p103720
+x = 92, y = 92, rule = B3/S23
+33bobo$34b2o$34bo6bo$40bo$40b3o$44b2o$44bobo$44bo2$22bobo$23b2o$23bo8b
+o$31bo$31b3o3$35b2o$35bobo$35bo4$9bo$10b2o$9b2o7$12b2o$11bobo$o12bo$b
+2o$2o14b3o$16bo$17bo3$3b2o$2bobo$4bo2$5b3o$5bo$6bo32$90b2o$89b2o$91bo
+9$79bo$78b2o$78bobo!

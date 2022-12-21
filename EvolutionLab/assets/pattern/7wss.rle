@@ -1,0 +1,6 @@
+#N 7wss.rle
+#O John Conway, 1970
+#C https://conwaylife.com/wiki/Overweight_spaceship
+#C https://www.conwaylife.com/patterns/7wss.rle
+x = 8, y = 5, rule = B3/S23
+3b3o$bo5bo$o$o6bo$7o!

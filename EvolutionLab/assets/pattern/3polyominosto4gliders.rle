@@ -1,0 +1,5 @@
+#N 3polyominosto4gliders.rle
+#C https://conwaylife.com/wiki/Pure_glider_generator
+#C https://www.conwaylife.com/patterns/3polyominosto4gliders.rle
+x = 15, y=9, rule = B3/S23
+2bo$2bo$3o2$6b3o$7bo$12b3o$12bo$12bo!

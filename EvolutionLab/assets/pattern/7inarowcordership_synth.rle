@@ -1,0 +1,15 @@
+#N 7-in-a-row Cordership synth
+#O Dave Greene
+#C 25-glider synthesis of the 7-in-a-row Cordership.
+#C Completed 27 April 2017, following AbhpzTa's discovery
+#C   of a three-glider switch engine synthesis
+#C https://conwaylife.com/wiki/7-in-a-row_Cordership
+#C https://conwaylife.com/patterns/7inarowcordership_synth.rle
+x = 213, y = 221, rule = B3/S23
+56bobo$57b2o$57bo112bo$169bo$169b3o27$64bo$62bobo$63b2o$153bobo$153b2o
+$154bo26$68bo$66bobo$67b2o$125bobo$125b2o$126bo21$o66bobo$b2o65b2o$2o
+66bo30bo$98bo$98b3o2$32bo$33bo$31b3o2$63bo$64bo$62b3o11$173b2o$173bobo
+$173bo4$102b2o$102bobo$102bo26b2o$128b2o27b2o$130bo25b2o$158bo11$65b2o
+$66b2o$65bo$96bo$95b2o$95bobo15$211bo$210b2o$210bobo6$34b2o$35b2o$34bo
+$97bo64b2o$96b2o64bobo$96bobo63bo4$140b3o$140bo$141bo5$3b2o$2bobo$4bo
+2$87b3o$87bo$88bo35$130b2o$129b2o$131bo!

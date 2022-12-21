@@ -1,0 +1,13 @@
+#N 4inarowcordership.rle
+#O wwei23, 2020
+#C https://conwaylife.com/wiki/4-in-a-row_Cordership
+#C https://www.conwaylife.com/patterns/4inarowcordership.rle
+x = 71, y = 71, rule = B3/S23
+45bo$44bobo$43b2ob2o$44bo2bo$46b3o$46bobo$47b2o$47b2o12b2o$61b2o3$45bo
+$34b3o9bo$35bo10b2o$35bo2bo6b3o$35bo2bo30b2o$36bobo30b2o$46b3o$44bo4bo
+$44b2o3bo$46b4o$35bo$34bobo$35bo3$33b4o$33b2o3bo$34bo4bo$36bob2o$37bo
+3$26b2o$12bo9bo3b3o$12b4o5bobo2bo$12bo3bo5bo3bo2bo$30bo20b3o$14b3o10bo
+bo$28b2o14b2o3bo5bo$43bo2bo2bo5bo$44b2o3bo5bo2$2bo37bo10b3o$b3o14b2o
+19bobo$o10bo2bo4bo19bobo$b2ob2o6b3o2bo2bo19bo$2b3ob2o5b2o2bo2bo$4b4o9b
+o2bo$18b3o18b3o2$37bo5bo$37bo5bo$37bo5bo2$39b3o6$7b2o$7b2o7$15b2o$15b
+2o!

@@ -1,0 +1,12 @@
+#N 2c3wire.rle
+#C https://conwaylife.com/wiki/2c/3_wire
+#C https://www.conwaylife.com/patterns/2c3wire.rle
+x = 69, y = 66, rule = B3/S23
+41bo$6bo32b2o$4bobo33b2o$5b2o2$34bo$33bo$33b3o2$25bo$23b3o$22bo$22b2o
+6$26bo4b2o$25bobobo2bo$26b2ob3o2$26b6o$25bo6bo$25bo2b5o$23bobobo7bo$
+23b2o2bo2b6o$27bobo$26b2obo2b6o$29bobo6bo$bo27bobo2b5o$b2o27b2obo7bo$o
+bo30bo2b6o$33bobo$32b2obo2b6o$35bobo6bo$5bo29bobo2b5o$5b2o29b2obo7bo$
+4bobo32bo2b6o$39bobo$38b2obo2b6o$41bobo6bo$41bobo2b5o$42b2obo7bo$45bo
+2b6o$45bobo$44b2obo2b6o$47bobo6bo$47bobo2b5o$48b2obo7bo$51bo2b6o$51bob
+o$50b2obo2b6o$53bobo6bo$53bobo2b5o$54b2obo7bo$57bo2b6o$57bobo$56b2obo
+2b6o$59bobo6bo$59bobo2b3obo$60b2obo3bo$63bo2bo$63bobo$62b2obobo$66b2o!

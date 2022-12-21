@@ -1,0 +1,5 @@
+#N 2glideroctomino.rle
+#C https://conwaylife.com/wiki/List_of_common_evolutionary_sequences
+#C https://www.conwaylife.com/patterns/2glideroctomino.rle
+x = 4, y = 4, rule = B3/S23
+2b2o$2b2o$3o$bo!

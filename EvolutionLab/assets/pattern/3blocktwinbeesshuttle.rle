@@ -1,0 +1,6 @@
+#N 3blocktwinbeesshuttle.rle
+#O Bill Gosper, 1971
+#C https://conwaylife.com/wiki/Twin_bees_shuttle
+#C https://www.conwaylife.com/patterns/3blocktwinbeesshuttle.rle
+x = 29, y = 11, rule = B3/S23
+17b2o$2o15bobo7b2o$2o17bo7b2o$17b3o4$17b3o$2o17bo$2o15bobo$17b2o!
