@@ -1,5 +1,5 @@
 use crate::{
-    template::{RenderOutput, Template},
+    template::{BeforeRendering, RenderOutput, Template},
     GenericComponent, GenericElement, GenericNode, Scope, View,
 };
 
@@ -8,9 +8,9 @@ define_placeholder!(Placeholder("空 `akun::Fragment` 组件的占位符"));
 type Views<N> = Vec<View<N>>;
 
 /// 将多个组件组合成一个片段。
-pub struct Fragment<N> {
+pub struct Fragment<N: GenericNode> {
     init: Box<dyn FnOnce(&mut Views<N>)>,
-    render: Box<dyn FnOnce(N, &mut Views<N>) -> Option<N>>,
+    render: Box<dyn FnOnce(BeforeRendering<N>, N, &mut Views<N>) -> Option<N>>,
 }
 
 impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
@@ -27,9 +27,9 @@ impl<N: GenericNode> GenericComponent<N> for Fragment<N> {
                     View::fragment(views)
                 }
             }),
-            render: Box::new(move |node| {
+            render: Box::new(move |before_rendering, node| {
                 let mut views = Views::default();
-                let next = render(node, &mut views);
+                let next = render(before_rendering, node, &mut views);
                 if views.is_empty() {
                     // 跳过占位符
                     let placeholder = next.unwrap();
@@ -54,7 +54,7 @@ pub fn Fragment<N: GenericNode>(_: Scope) -> Fragment<N> {
     Fragment {
         init: Box::new(|_| {}),
         // 跳过第一次 render
-        render: Box::new(|first, _| Some(first)),
+        render: Box::new(|_, first, _| Some(first)),
     }
 }
 
@@ -70,9 +70,9 @@ impl<N: GenericNode> Fragment<N> {
             (self.init)(views);
             views.push(init());
         });
-        self.render = Box::new(move |first, views| {
-            let node = (self.render)(first, views);
-            let RenderOutput { next, view } = render(node.unwrap());
+        self.render = Box::new(move |before_rendering, first, views| {
+            let node = (self.render)(before_rendering, first, views);
+            let RenderOutput { next, view } = render(before_rendering, node.unwrap());
             views.push(view);
             next
         });

@@ -1,17 +1,17 @@
 use crate::{
-    untrack, utils::ViewParentExt, view, GenericComponent, GenericElement, GenericNode,
-    IntoReactive, Reactive, Scope, View,
+    untrack, utils::ViewParentExt, view, DynComponent, GenericComponent, GenericElement,
+    GenericNode, IntoReactive, Reactive, Scope, View,
 };
 use std::{collections::HashMap, hash::Hash};
 
 define_placeholder!(Placeholder("空 `akun::For` 的占位符"));
 
 /// 动态更新的列表。
-pub struct For<N, T: 'static, K: 'static> {
+pub struct For<N: GenericNode, T: 'static, K: 'static> {
     cx: Scope,
     each: Option<Reactive<Vec<T>>>,
     key: Option<Box<dyn Fn(&T) -> K>>,
-    children: Option<Box<dyn Fn(&T) -> View<N>>>,
+    children: Option<Box<dyn Fn(&T) -> DynComponent<N>>>,
 }
 
 /// 创建一个 [`struct@For`] 组件。
@@ -57,68 +57,73 @@ where
         let fn_view = children.expect("`For` 没有指定 `child`");
         view(cx).root_with(move |placeholder: Placeholder<N>| {
             let placeholder = View::node(placeholder.into_node());
-            let mounted_view = cx.create_signal(placeholder.clone());
-            let mut mounted_fragment = Vec::new();
-            let mut cached_views = HashMap::<K, Cached<N>>::new();
-            cx.create_effect(move || {
-                let each = each.clone().into_value();
-                untrack(|| {
-                    let current_view = mounted_view.get();
-                    let parent = current_view.parent();
-                    // 用占位符替代空视图
-                    if each.is_empty() {
-                        if !current_view.ref_eq(&placeholder) {
-                            parent.replace_child(&placeholder, &current_view);
-                            mounted_view.set(placeholder.clone());
-                        }
-                        return;
-                    }
-                    // 复用或创建视图
-                    let mut new_fragment = Vec::with_capacity(each.len());
-                    for val in each.iter() {
-                        let k = fn_key(val);
-                        let Cached { view, moved } =
-                            cached_views.entry(k.clone()).or_insert_with(|| Cached {
-                                view: fn_view(val),
-                                moved: false,
-                            });
-                        if !*moved {
+            let dyn_view = View::dyn_(cx, placeholder.clone());
+            cx.create_effect({
+                let mounted_view = dyn_view.clone();
+                let mut mounted_fragment = Vec::new();
+                let mut cached_views = HashMap::<K, Cached<N>>::new();
+                move || {
+                    let each = each.clone().into_value();
+                    untrack(|| {
+                        let current_view = mounted_view.get();
+                        let parent = current_view.parent();
+                        // 复用或创建视图
+                        let mut new_fragment = Vec::with_capacity(each.len());
+                        for val in each.iter() {
+                            let k = fn_key(val);
+                            let Cached { view, moved } =
+                                cached_views.entry(k.clone()).or_insert_with(|| Cached {
+                                    view: fn_view(val).render(),
+                                    moved: false,
+                                });
+                            if *moved {
+                                // 忽略重复的键值
+                                continue;
+                            }
                             *moved = true;
                             new_fragment.push(Pair { k, v: view.clone() });
                         }
-                    }
-                    let new_view =
-                        View::fragment(new_fragment.iter().map(|pair| pair.v.clone()).collect());
-                    if mounted_fragment.is_empty() {
-                        // 初始化并移除占位符
-                        parent.replace_child(&new_view, &current_view);
-                    } else {
-                        // 新旧视图作 diff
-                        reconcile(
-                            &mut cached_views,
-                            parent.as_ref(),
-                            &mounted_fragment,
-                            &new_fragment,
-                        );
-                        // 更新之后缓存的视图应该与新的片段一致
-                        debug_assert_eq!(cached_views.len(), new_fragment.len());
-                        if cfg!(debug_assertions) {
-                            for Pair { v, .. } in new_fragment.iter() {
-                                assert!(v.parent() == parent);
+                        let new_view;
+                        if new_fragment.is_empty() {
+                            if mounted_fragment.is_empty() {
+                                return;
                             }
+                            // 用占位符替换空视图
+                            parent.replace_child(&placeholder, &current_view);
+                            mounted_fragment.clear();
+                            cached_views.clear();
+                            new_view = placeholder.clone();
+                        } else {
+                            new_view = View::fragment(
+                                new_fragment.iter().map(|pair| pair.v.clone()).collect(),
+                            );
+                            if mounted_fragment.is_empty() {
+                                // 新视图替换掉占位符
+                                parent.replace_child(&new_view, &placeholder);
+                            } else {
+                                // 新旧视图作 diff
+                                reconcile(
+                                    &mut cached_views,
+                                    parent.as_ref(),
+                                    &mounted_fragment,
+                                    &new_fragment,
+                                );
+                            }
+                            mounted_fragment = new_fragment;
                         }
-                    }
-                    for v in cached_views.values_mut() {
-                        v.moved = false;
-                        debug_assert!(v.view.parent() == parent);
-                    }
-                    // 更新视图
-                    mounted_fragment = new_fragment;
-                    debug_assert!(parent.check_children(&new_view));
-                    mounted_view.set(new_view);
-                });
+                        // 重置缓存状态
+                        for v in cached_views.values_mut() {
+                            debug_assert!(v.moved);
+                            v.moved = false;
+                        }
+                        // 更新之后缓存的视图应该与挂载的片段一致
+                        debug_assert_eq!(cached_views.len(), mounted_fragment.len());
+                        debug_assert!(new_view.check_mount_order());
+                        mounted_view.set(new_view);
+                    });
+                }
             });
-            View::from(mounted_view)
+            dyn_view.into()
         })
     }
 
@@ -142,13 +147,13 @@ where
         if self.children.is_some() {
             panic!("`For` 有且只能有一个 `child`");
         }
-        self.children = Some(Box::new(move |val| child(val).render()));
+        self.children = Some(Box::new(move |val| child(val).into_dyn_component()));
         self
     }
 }
 
 #[derive(Clone)]
-struct Cached<N> {
+struct Cached<N: GenericNode> {
     view: View<N>,
     moved: bool,
 }

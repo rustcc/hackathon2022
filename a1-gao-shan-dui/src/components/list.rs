@@ -1,15 +1,15 @@
 use crate::{
-    untrack, utils::ViewParentExt, view, GenericComponent, GenericElement, GenericNode,
-    IntoReactive, Reactive, Scope, View,
+    untrack, utils::ViewParentExt, view, DynComponent, GenericComponent, GenericElement,
+    GenericNode, IntoReactive, Reactive, Scope, View,
 };
 
 define_placeholder!(Placeholder("空 `akun::List` 的占位符"));
 
 /// 动态更新的列表。
-pub struct List<N, T: 'static> {
+pub struct List<N: GenericNode, T: 'static> {
     cx: Scope,
     each: Option<Reactive<Vec<T>>>,
-    children: Option<Box<dyn Fn(&T, usize) -> View<N>>>,
+    children: Option<Box<dyn Fn(&T, usize) -> DynComponent<N>>>,
 }
 
 /// 创建一个 [`struct@List`] 组件。
@@ -45,50 +45,57 @@ where
         let fn_view = children.expect("`List` 没有指定 `child`");
         view(cx).root_with(move |placeholder: Placeholder<N>| {
             let placeholder = View::node(placeholder.into_node());
-            let mut mounted_fragment = Vec::new();
-            let mounted_view = cx.create_signal(placeholder.clone());
-            cx.create_effect(move || {
-                // 只需要跟踪 `each` 的变化。
-                let each = each.clone().into_value();
-                untrack(|| {
-                    let current_view = mounted_view.get();
-                    let parent = current_view.parent();
-                    let next_sibling = current_view.next_sibling();
-                    let mounted_len = mounted_fragment.len();
-                    let mut new_len = 0;
-                    for val in each.iter() {
-                        // 将新增的视图挂载到当前视图之后。
-                        if new_len >= mounted_len {
-                            let new_view = fn_view(val, new_len);
-                            parent.insert_before(&new_view, next_sibling.as_ref());
-                            mounted_fragment.push(new_view);
+            let dyn_view = View::dyn_(cx, placeholder.clone());
+            cx.create_effect({
+                let mounted_view = dyn_view.clone();
+                let mut mounted_fragment = Vec::new();
+                move || {
+                    // 只需要跟踪 `each` 的变化。
+                    let each = each.clone().into_value();
+                    untrack(|| {
+                        let current_view = mounted_view.get();
+                        let parent = current_view.parent();
+                        let mounted_len = mounted_fragment.len();
+                        let mut new_len = 0;
+                        let next_sibling = current_view.next_sibling();
+                        for val in each.iter() {
+                            // 将新增的视图挂载到当前视图之后。
+                            if new_len >= mounted_len {
+                                let new_view = fn_view(val, new_len).render();
+                                parent.insert_before(&new_view, next_sibling.as_ref());
+                                mounted_fragment.push(new_view);
+                            }
+                            new_len += 1;
                         }
-                        new_len += 1;
-                    }
-                    if new_len == 0 {
-                        // 用占位符替换掉空的视图。
-                        if mounted_len != 0 {
+                        let new_view;
+                        if new_len == mounted_len {
+                            return;
+                        } else if new_len == 0 {
+                            if mounted_len == 0 {
+                                return;
+                            }
+                            // 用占位符替换掉空的视图。
                             parent.replace_child(&placeholder, &current_view);
                             mounted_fragment.clear();
-                            mounted_view.set(placeholder.clone());
+                            new_view = placeholder.clone();
+                        } else {
+                            if new_len < mounted_len {
+                                // 移除多余的视图。
+                                for view in mounted_fragment.drain(new_len..) {
+                                    parent.remove_child(&view);
+                                }
+                            } else if mounted_len == 0 {
+                                // new_len > mounted_len，移除占位符。
+                                parent.remove_child(&placeholder);
+                            }
+                            new_view = View::fragment(mounted_fragment.clone());
                         }
-                    } else if new_len > mounted_len {
-                        // 移除占位符。
-                        if mounted_len == 0 {
-                            parent.remove_child(&placeholder);
-                        }
-                        mounted_view.set(View::fragment(mounted_fragment.clone()))
-                    } else if new_len < mounted_len {
-                        // 移除多余的视图。
-                        for view in mounted_fragment.drain(new_len..) {
-                            parent.remove_child(&view);
-                        }
-                        mounted_view.set(View::fragment(mounted_fragment.clone()))
-                    }
-                    debug_assert!(parent.check_children(&mounted_view.get()));
-                });
+                        debug_assert!(new_view.check_mount_order());
+                        mounted_view.set(new_view);
+                    });
+                }
             });
-            View::from(mounted_view)
+            dyn_view.into()
         })
     }
 
@@ -107,7 +114,7 @@ where
         if self.children.is_some() {
             panic!("`List` 有且只能有一个 `child`");
         }
-        self.children = Some(Box::new(move |t, i| child(t, i).render()));
+        self.children = Some(Box::new(move |t, i| child(t, i).into_dyn_component()));
         self
     }
 }

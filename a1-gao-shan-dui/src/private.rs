@@ -40,7 +40,7 @@ where
     Element(cx).root(|text: crate::elements::text<N>| text.data(reactive))
 }
 
-pub struct ViewRoot<N> {
+pub struct ViewRoot<N: GenericNode> {
     id: Option<fn() -> TemplateId>,
     children: Option<DynComponent<N>>,
 }

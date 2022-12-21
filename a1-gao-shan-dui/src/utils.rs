@@ -22,49 +22,48 @@ macro_rules! define_placeholder {
 }
 
 /// 辅助特性，忽略掉当一个视图被卸载时的节点操作。
-pub trait ViewParentExt<'a, N: GenericNode>: Into<Option<&'a N>> {
-    fn append_child(self, new_view: &View<N>) {
-        if let Some(parent) = self.into() {
+pub trait ViewParentExt<N: GenericNode> {
+    fn with_parent(&self, f: impl FnOnce(&N));
+
+    fn append_child(&self, new_view: &View<N>) {
+        self.with_parent(|parent| {
             new_view.remove_from(parent);
-        }
+        });
     }
 
-    fn replace_child(self, new_view: &View<N>, position: &View<N>) {
-        if let Some(parent) = self.into() {
-            position.replace_with(parent, new_view);
-        }
+    fn replace_child(&self, new_view: &View<N>, old_view: &View<N>) {
+        self.with_parent(|parent| {
+            old_view.replace_with(parent, new_view);
+        });
     }
 
-    fn remove_child(self, position: &View<N>) {
-        if let Some(parent) = self.into() {
+    fn remove_child(&self, position: &View<N>) {
+        self.with_parent(|parent| {
             position.remove_from(parent);
-        }
+        });
     }
 
-    fn insert_before(self, new_view: &View<N>, position: Option<&N>) {
-        if let Some(parent) = self.into() {
+    fn insert_before(&self, new_view: &View<N>, position: Option<&N>) {
+        self.with_parent(|parent| {
             new_view.move_before(parent, position);
-        }
-    }
-
-    /// 遍历全部节点，检查是否与 `first` 及其之后的兄弟节点顺序一致。
-    fn check_children(self, view: &View<N>) -> bool {
-        let mut equal = true;
-        if self.into().is_some() {
-            let mut current = Some(view.first());
-            view.visit(|node| {
-                if let Some(real) = current.as_ref() {
-                    if real.ne(node) {
-                        equal = false;
-                    }
-                    current = real.next_sibling();
-                } else {
-                    equal = false;
-                }
-            });
-        }
-        equal
+        });
     }
 }
 
-impl<'a, N: GenericNode, T: Into<Option<&'a N>>> ViewParentExt<'a, N> for T {}
+impl<N: GenericNode> ViewParentExt<N> for N {
+    fn with_parent(&self, f: impl FnOnce(&N)) {
+        f(self);
+    }
+}
+
+impl<N: GenericNode> ViewParentExt<N> for Option<N> {
+    fn with_parent(&self, f: impl FnOnce(&N)) {
+        self.as_ref().with_parent(f);
+    }
+}
+
+impl<N: GenericNode> ViewParentExt<N> for Option<&N> {
+    fn with_parent(&self, f: impl FnOnce(&N)) {
+        self.map(|n| n.with_parent(f));
+    }
+}

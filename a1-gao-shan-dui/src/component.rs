@@ -1,5 +1,7 @@
 use crate::{
-    template::{GlobalTemplates, RenderOutput, Template, TemplateContent, TemplateId},
+    template::{
+        BeforeRendering, GlobalTemplates, RenderOutput, Template, TemplateContent, TemplateId,
+    },
     untrack, GenericNode, NodeType, View,
 };
 
@@ -26,13 +28,13 @@ pub trait GenericComponent<N: GenericNode>: 'static + Sized {
     }
 
     /// 初始化模板，并在渲染阶段执行前将模板挂载到 `parent`。
-    fn mount_to(self, parent: &N) {
-        untrack(|| self.into_dyn_component().mount_to(parent));
+    fn mount_to(self, parent: &N) -> View<N> {
+        self.into_dyn_component().mount_to(parent)
     }
 }
 
 /// 将某个组件打包成 [`DynComponent`]。
-pub struct DynComponent<N> {
+pub struct DynComponent<N: GenericNode> {
     /// 用于标识该模板的唯一 ID。
     id: Option<TemplateId>,
     template: Template<N>,
@@ -52,16 +54,16 @@ impl<N: GenericNode> GenericComponent<N> for DynComponent<N> {
     }
 
     fn render(self) -> View<N> {
-        self.render_impl(|_| {})
+        self.render_impl(None)
     }
 
-    fn mount_to(self, parent: &N) {
-        self.render_impl(|container| parent.append_child(container));
+    fn mount_to(self, parent: &N) -> View<N> {
+        self.render_impl(Some(parent))
     }
 }
 
 impl<N: GenericNode> DynComponent<N> {
-    fn render_impl(self, after_init: impl FnOnce(&N)) -> View<N> {
+    fn render_impl(self, parent: Option<&N>) -> View<N> {
         let Self {
             id,
             template: Template { init, render },
@@ -82,12 +84,16 @@ impl<N: GenericNode> DynComponent<N> {
             }
         };
         let first_child = container.first_child();
-        after_init(&container);
-        // 2) 渲染阶段
-        let RenderOutput { view, next } = render(first_child.unwrap());
+        // 2) 渲染阶段，忽略产生的副作用（通常是读写动态视图）
+        let before_rendering = parent
+            .map(BeforeRendering::AppendTo)
+            .unwrap_or(BeforeRendering::RemoveFrom(&container));
+        let RenderOutput { view, next } =
+            untrack(|| render(before_rendering, first_child.unwrap()));
+        // 子代应该被正确的移除或者转移
+        debug_assert!(container.first_child().is_none());
         // next 应该指向最后一个子结点的下一个节点，即 None
         debug_assert!(next.is_none());
-        // TODO: 渲染后从模板节点移除
         view
     }
 }

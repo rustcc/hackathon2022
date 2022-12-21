@@ -1,12 +1,12 @@
 use crate::{
-    template::{RenderOutput, Template},
+    template::{BeforeRendering, RenderOutput, Template},
     GenericComponent, GenericElement, GenericNode, Scope, View,
 };
 
 type InitAndRenderRoot<N> = (Box<dyn FnOnce() -> N>, Box<dyn FnOnce(N) -> View<N>>);
 
 /// 将某个元素包装成成一个组件。
-pub struct Element<N> {
+pub struct Element<N: GenericNode> {
     cx: Scope,
     /// 初始化和渲染渲染这个元素。
     init_and_render_root: Option<InitAndRenderRoot<N>>,
@@ -31,7 +31,12 @@ impl<N: GenericNode> GenericComponent<N> for Element<N> {
                 init_children(&root);
                 View::node(root)
             }),
-            render: Box::new(|root| {
+            render: Box::new(|before_rendering, root| {
+                match before_rendering {
+                    BeforeRendering::AppendTo(parent) => parent.append_child(&root),
+                    BeforeRendering::RemoveFrom(parent) => parent.remove_child(&root),
+                    BeforeRendering::Nothing => {}
+                }
                 let first_child = root.first_child();
                 let next = root.next_sibling();
                 let view = render(root);
@@ -93,7 +98,7 @@ impl<N: GenericNode> Element<N> {
         });
         self.render_children = Box::new(move |first| {
             let node = (self.render_children)(first);
-            render(node.unwrap()).next
+            render(BeforeRendering::Nothing, node.unwrap()).next
         });
         self
     }

@@ -1,40 +1,23 @@
-use crate::{GenericNode, Signal};
+use crate::{GenericNode, Scope, Signal};
 use std::rc::Rc;
-
-type ViewDyn<N> = Rc<dyn Fn() -> View<N>>;
 
 /// 细粒度更新视图的核心机制。每个组件通过 [`View`] 与其父组件同步视图，以保证父
 /// 组件可将其视为一个整体来执行动态更新。
 #[derive(Clone)]
-pub struct View<N>(ViewType<N>);
+pub struct View<N: GenericNode>(ViewType<N>);
 
 use ViewType as VT;
 
 #[derive(Clone)]
-enum ViewType<N> {
+enum ViewType<N: GenericNode> {
     Node(N),
     Fragment(Rc<[View<N>]>),
-    Dyn(ViewDyn<N>),
+    Dyn(Signal<View<N>>),
 }
 
-impl<N> ViewType<N> {
+impl<N: GenericNode> ViewType<N> {
     fn fragment(views: Vec<View<N>>) -> Self {
         Self::Fragment(views.into_boxed_slice().into())
-    }
-}
-
-impl<N, F> From<F> for View<N>
-where
-    F: 'static + Fn() -> View<N>,
-{
-    fn from(f: F) -> Self {
-        Self(VT::Dyn(Rc::new(f)))
-    }
-}
-
-impl<N: Clone> From<Signal<View<N>>> for View<N> {
-    fn from(t: Signal<View<N>>) -> Self {
-        Self::from(move || t.get())
     }
 }
 
@@ -56,6 +39,13 @@ impl<N: GenericNode> View<N> {
         Self(VT::fragment(views))
     }
 
+    /// 创建一个动态视图。
+    pub fn dyn_(cx: Scope, init: View<N>) -> DynView<N> {
+        DynView {
+            inner: cx.create_signal(init),
+        }
+    }
+
     /// 对所有的节点执行 [`deep_clone`]，动态视图则拷贝其引用。
     ///
     /// [`deep_clone`]: [`GenericNode::deep_clone`]
@@ -63,7 +53,7 @@ impl<N: GenericNode> View<N> {
         Self(match &self.0 {
             VT::Node(t) => VT::Node(t.deep_clone()),
             VT::Fragment(t) => VT::fragment(t.iter().map(|t| t.deep_clone()).collect::<Vec<_>>()),
-            VT::Dyn(t) => VT::Dyn(t.clone()),
+            VT::Dyn(t) => VT::Dyn(*t),
         })
     }
 
@@ -77,7 +67,7 @@ impl<N: GenericNode> View<N> {
         match &self.0 {
             VT::Node(t) => f(t),
             VT::Fragment(t) => t.iter().for_each(|t| t.visit_impl(f)),
-            VT::Dyn(t) => t().visit_impl(f),
+            VT::Dyn(t) => t.get().visit_impl(f),
         }
     }
 
@@ -86,12 +76,7 @@ impl<N: GenericNode> View<N> {
         match (&self.0, &other.0) {
             (VT::Node(t1), VT::Node(t2)) => t1.eq(t2),
             (VT::Fragment(t1), VT::Fragment(t2)) => Rc::ptr_eq(t1, t2),
-            // NOTE: https://rust-lang.github.io/rust-clippy/master/index.html#vtable_address_comparisons
-            (VT::Dyn(t1), VT::Dyn(t2)) => {
-                let ptr1 = Rc::as_ptr(t1).cast::<()>();
-                let ptr2 = Rc::as_ptr(t2).cast::<()>();
-                ptr1 == ptr2
-            }
+            (VT::Dyn(t1), VT::Dyn(t2)) => t1.ref_eq(t2),
             _ => false,
         }
     }
@@ -102,7 +87,7 @@ impl<N: GenericNode> View<N> {
             match current.0 {
                 VT::Node(t) => return t,
                 VT::Fragment(t) => current = t.first().unwrap().clone(),
-                VT::Dyn(t) => current = t(),
+                VT::Dyn(t) => current = t.get(),
             }
         }
     }
@@ -113,7 +98,7 @@ impl<N: GenericNode> View<N> {
             match current.0 {
                 VT::Node(t) => return t,
                 VT::Fragment(t) => current = t.last().unwrap().clone(),
-                VT::Dyn(t) => current = t(),
+                VT::Dyn(t) => current = t.get(),
             }
         }
     }
@@ -148,8 +133,48 @@ impl<N: GenericNode> View<N> {
     }
 
     pub fn move_before(&self, parent: &N, position: Option<&N>) {
-        if position.map(|node| View::node(node.clone()).ref_eq(self)) != Some(true) {
+        if position.map(|node| self.first().eq(node)) != Some(true) {
             self.visit(|t| parent.insert_before(t, position));
         }
+    }
+
+    /// 遍历全部兄弟节点，检查实际挂载的顺序与视图的顺序是否一致。
+    pub fn check_mount_order(&self) -> bool {
+        let mut correct = true;
+        let mut current = Some(self.first());
+        self.visit(|node| {
+            if node.parent().is_some() {
+                if let Some(real) = current.as_ref() {
+                    if real.ne(node) {
+                        correct = false;
+                    }
+                    current = real.next_sibling();
+                } else {
+                    correct = false;
+                }
+            }
+        });
+        correct
+    }
+}
+
+#[derive(Clone)]
+pub struct DynView<N: GenericNode> {
+    inner: Signal<View<N>>,
+}
+
+impl<N: GenericNode> From<DynView<N>> for View<N> {
+    fn from(value: DynView<N>) -> Self {
+        View(ViewType::Dyn(value.inner))
+    }
+}
+
+impl<N: GenericNode> DynView<N> {
+    pub fn get(&self) -> View<N> {
+        self.inner.get()
+    }
+
+    pub fn set(&self, view: View<N>) {
+        self.inner.set(view);
     }
 }

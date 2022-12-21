@@ -21,17 +21,17 @@ pub fn Show<N: GenericNode>(cx: Scope) -> Show<N> {
 }
 
 /// 动态检查每个分支的条件被渲染特定的组件。
-pub struct Show<N> {
+pub struct Show<N: GenericNode> {
     cx: Scope,
     children: Vec<ShowChild<N>>,
 }
 
-pub struct ShowChild<N> {
+pub struct ShowChild<N: GenericNode> {
     cond: Reactive<bool>,
     content: DynComponent<N>,
 }
 
-struct Branch<N> {
+struct Branch<N: GenericNode> {
     cond: Reactive<bool>,
     view: View<N>,
 }
@@ -45,52 +45,58 @@ where
         // 使用占位符来标定需要挂载的位置
         view(cx).root_with(move |placeholder: Placeholder<N>| {
             let placeholder = View::node(placeholder.into_node());
-            let branches = children
-                .into_iter()
-                .map(|ShowChild { cond, content }| Branch {
-                    cond,
-                    // 忽略渲染时产生的副作用，通常是读取动态视图时产生的
-                    view: untrack(|| content.render()),
-                })
-                // 如果 `children` 为空则用占位符替代
-                .chain(Some(Branch {
-                    cond: Value(true),
-                    view: placeholder.clone(),
-                }))
-                .collect::<Vec<_>>();
-            let mounted_view = cx.create_signal(placeholder);
-            // `current_view` 被卸载之后，如果重新渲染被触发，则在一个模板中执行渲染。
-            cx.create_effect(move || {
-                for branch in branches.iter() {
-                    let Branch::<N> {
+            let dyn_view = View::dyn_(cx, placeholder.clone());
+            cx.create_effect({
+                let mounted_view = dyn_view.clone();
+                let branches = children
+                    .into_iter()
+                    .map(|ShowChild { cond, content }| Branch {
                         cond,
-                        view: new_view,
-                    } = branch;
-                    if cond.clone().into_value() {
-                        // 我们只需要在 `Show` 条件更新时获取动态视图最新的内容，而不需要
-                        // 一直跟踪该视图的变化。
-                        untrack(|| {
-                            let current_view = mounted_view.get();
-                            // 需要注意的是，`current_view` 的 `parent` 并不一定为
-                            // `placeholder` 最初的 `parent`，因为一个组件可能在模板
-                            // 节点中完成第一次渲染，然后整体被挂载到其他的位置。故每次更新
-                            // 视图时都需要重新获取 `current_view` 的父级。
-                            let parent = current_view.parent();
-                            if !current_view.ref_eq(new_view) {
-                                parent.replace_child(new_view, &current_view);
-                                mounted_view.set(new_view.clone());
-                            }
-                        });
-                        break;
+                        // 忽略渲染时产生的副作用，通常是读取动态视图时产生的
+                        // TODO: 延迟渲染
+                        view: untrack(|| content.render()),
+                    })
+                    // 如果 `children` 为空则用占位符替代
+                    .chain(Some(Branch {
+                        cond: Value(true),
+                        view: placeholder,
+                    }))
+                    .collect::<Vec<_>>();
+                let mut mounted_index = branches.len() - 1;
+                move || {
+                    for (index, branch) in branches.iter().enumerate() {
+                        let Branch::<N> {
+                            cond,
+                            view: new_view,
+                        } = branch;
+                        if cond.clone().into_value() {
+                            // 我们只需要在 `Show` 条件更新时获取动态视图最新的内容，而不需要
+                            // 一直跟踪该视图的变化。
+                            untrack(|| {
+                                let current_view = mounted_view.get();
+                                // 需要注意的是，`current_view` 的 `parent` 并不一定为
+                                // `placeholder` 最初的 `parent`，因为一个组件可能在模板
+                                // 节点中完成第一次渲染，然后整体被挂载到其他的位置。故每次更新
+                                // 视图时都需要重新获取 `current_view` 的父级。
+                                let parent = current_view.parent();
+                                if mounted_index != index {
+                                    parent.replace_child(new_view, &current_view);
+                                    mounted_index = index;
+                                    debug_assert!(new_view.check_mount_order());
+                                    mounted_view.set(new_view.clone());
+                                }
+                            });
+                            break;
+                        }
                     }
                 }
             });
-            View::from(mounted_view)
+            dyn_view.into()
         })
     }
 }
 
-impl<N> Show<N> {
+impl<N: GenericNode> Show<N> {
     pub fn child(mut self, child: ShowChild<N>) -> Show<N> {
         self.children.push(child);
         self
@@ -119,7 +125,7 @@ pub fn If<N: GenericNode>(_: Scope) -> If<N> {
 /// 作为 [`Show`] 的条件挂载分支。
 ///
 /// [`Show`]: Show()
-pub struct If<N> {
+pub struct If<N: GenericNode> {
     when: Option<Reactive<bool>>,
     children: Option<DynComponent<N>>,
 }
@@ -168,7 +174,7 @@ pub fn Else<N: GenericNode>(_: Scope) -> Else<N> {
 /// 作为 [`Show`] 的无条件挂载分支。
 ///
 /// [`Show`]: Show()
-pub struct Else<N> {
+pub struct Else<N: GenericNode> {
     children: Option<DynComponent<N>>,
 }
 

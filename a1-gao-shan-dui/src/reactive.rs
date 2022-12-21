@@ -202,6 +202,11 @@ impl<T> Signal<T> {
         })
     }
 
+    /// 检查两个 [`Signal`] 的引用是否相等。
+    pub fn ref_eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+
     /// 写入此 [`Signal`]，并触发受其影响的 [`Effect`]。
     pub fn set(&self, val: T) {
         self.write(|t| *t = val);
