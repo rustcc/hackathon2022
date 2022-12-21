@@ -1,0 +1,32 @@
+[workspace]
+members = ["examples/*"]
+
+[package]
+name = "akun"
+version = "0.0.0"
+license = "MIT OR Apache-2.0"
+authors = ["loichyan <loichyan@foxmail.com>"]
+edition = "2021"
+
+[dependencies]
+js-sys = "0.3"
+slotmap = "1.0"
+wasm-bindgen = "0.2"
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+    "Comment",
+    "Document",
+    "DocumentFragment",
+    "DomTokenList",
+    "Element",
+    "Event",
+    "HtmlTemplateElement",
+    "Text",
+    "Window",
+]
+
+[profile.release]
+lto = true
+opt-level = "z"
